@@ -1,9 +1,9 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://example.com/schemas/ppl-front-matter.schema.json",
-  "title": "PPL-Doc Front-Matter Schema (v2.0)",
+  "title": "PPL-Doc Front-Matter Schema (v2.0.1)",
   "description": "Defines the structure for YAML front-matter in Project Philosophy Library (PPL) Markdown documents using JSON Schema Draft 2020-12. This version utilizes separate definition files for better maintainability and incorporates review feedback. Temporal consistency (e.g., created_at <= last_updated <= expires_at) and language code consistency (between language/preferred_langs and localized_overrides) MUST be checked externally (e.g., via CI).",
-  "$comment": "This schema defines the core metadata structure for PPL documents. It relies on external definition files (patterns.schema.json, common-defs.schema.json, metadata-defs.schema.json, content-defs.schema.json). Several consistency checks (temporal, language, path/ID existence) are intended to be performed by external tools like CI linters.",
+  "$comment": "This schema defines the core metadata structure for PPL documents. It relies on external definition files (patterns.schema.json, common-defs.schema.json, metadata-defs.schema.json, content-defs.schema.json). Several consistency checks (temporal, language, path/ID existence) are intended to be performed by external tools like CI linters. v2.0.1: Added doc_type and made core_principles conditional based on layer.",
   "$vocabulary": {
     "https://json-schema.org/draft/2020-12/vocab/core": true,
     "https://json-schema.org/draft/2020-12/vocab/applicator": true,
@@ -17,10 +17,10 @@
   "properties": {
     "schema_version": {
       "type": "string",
-      "const": "2.0",
+      "const": "2.0.1",
       "$comment": "Indicates the version of this schema structure.",
-      "description": "Version of this PPL front-matter schema definition (must be '2.0').",
-      "examples": ["2.0"]
+      "description": "Version of this PPL front-matter schema definition (must be '2.0.1').",
+      "examples": ["2.0.1"]
     },
     "id": {
       "$ref": "patterns.schema.json#pattern-docId",
@@ -44,6 +44,20 @@
       "$ref": "patterns.schema.json#pattern-semVer",
       "description": "Document version, compliant with Semantic Versioning 2.0.0 (https://semver.org).",
       "examples": ["1.0.0", "2.1.0-beta.1"]
+    },
+    "doc_type": {
+      "type": "string",
+      "description": "Type of the document (e.g., guideline, reference, playbook). Used for searchability and automation. Defined in the schema.",
+      "enum": [
+        "guideline",
+        "reference",
+        "playbook",
+        "adr_template",
+        "policy",
+        "report"
+      ],
+      "$comment": "The specific enum values should be finalized within the project, but these are initial suggestions based on the Document Map.",
+      "examples": ["guideline", "playbook"]
     },
     "language": {
       "$ref": "patterns.schema.json#pattern-bcp47LangCode",
@@ -257,7 +271,7 @@
       "type": "array",
       "minItems": 1,
       "items": { "$dynamicRef": "content-defs.schema.json#content-CorePrinciple" },
-      "description": "List of core principles defined within this document."
+      "description": "List of core principles defined within this document. Note: This is conditionally required based on the 'layer' property (required for L0-L4)."
     }
   },
   "required": [
@@ -272,8 +286,7 @@
     "last_updated",
     "abstract",
     "summary",
-    "detail_ref",
-    "core_principles"
+    "detail_ref"
   ],
   "dependentRequired": {
     "signed_by": ["checksum"]
@@ -300,6 +313,15 @@
         }
       ]
     }
+  },
+  "if": {
+    "properties": {
+      "layer": { "enum": ["L0", "L1", "L2", "L3", "L4"] }
+    },
+    "required": ["layer"]
+  },
+  "then": {
+    "required": ["core_principles"]
   },
   "patternProperties": {
     "^x_ppl_": { "$dynamicRef": "common-defs.schema.json#common-CustomExtension" }
