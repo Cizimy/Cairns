@@ -1,0 +1,82 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/schemas/common-defs.schema.json",
+  "title": "PPL Schema - Common Type Definitions",
+  "description": "Contains commonly used type definitions for the Project Philosophy Library schema.",
+  "$comment": "These definitions are referenced by other schema definition files.",
+  "$defs": {
+    "DocStatus": {
+      "$anchor": "common-DocStatusEnum",
+      "type": "string",
+      "enum": ["DRAFT", "WIP", "REVIEW", "APPROVED", "FIXED", "DEPRECATED"],
+      "description": "Current status of the document or principle.",
+      "examples": ["DRAFT", "APPROVED"]
+    },
+    "ApprovedDeprecatedFixedStatus": {
+        "$anchor": "common-ApprovedDeprecatedFixedStatus",
+        "type": "string",
+        "enum": ["APPROVED", "DEPRECATED", "FIXED"],
+        "description": "Status indicating the document/principle is finalized (approved, deprecated, or fixed)."
+    },
+    "ApprovedOrFixedStatus": {
+        "$anchor": "common-ApprovedOrFixedStatus",
+        "type": "string",
+        "enum": ["APPROVED", "FIXED"],
+        "description": "Status indicating the document/principle is actively approved or fixed."
+    },
+    "PrincipleStatus": {
+       "$ref": "#common-DocStatusEnum",
+       "description": "Alias for Document Status, used specifically for principles."
+    },
+    "MaturityLevel": {
+      "$dynamicAnchor": "common-MaturityLevel",
+      "description": "Maturity level of the document or principle. Allows standard values or custom strings.",
+      "anyOf": [
+        { "type": "string", "enum": ["experimental", "validated", "stable", "obsolete", "legacy"] },
+        { "type": "string", "pattern": "^[a-zA-Z0-9_-]+$" }
+      ],
+      "$comment": "Allows standard enum values or a custom pattern for flexibility.",
+      "examples": ["stable", "experimental", "internal-beta"]
+    },
+    "RiskLevel": {
+      "$dynamicAnchor": "common-RiskLevel",
+      "description": "Assessed risk level. Allows standard values or custom strings.",
+       "anyOf": [
+        { "type": "string", "enum": ["low", "medium", "high", "critical"] },
+        { "type": "string", "pattern": "^[a-zA-Z0-9_-]+$" }
+      ],
+      "$comment": "Allows standard enum values or a custom pattern for flexibility.",
+      "examples": ["medium", "high", "compliance-critical"]
+    },
+    "VisibilityLevel": {
+      "$dynamicAnchor": "common-VisibilityLevel",
+      "description": "Controls the visibility of the document. Allows standard values or custom strings.",
+      "anyOf": [
+        { "type": "string", "enum": ["internal", "public", "restricted", "confidential"] },
+        { "type": "string", "pattern": "^[a-zA-Z0-9_-]+$" }
+      ],
+      "$comment": "Allows standard enum values or a custom pattern for flexibility.",
+      "examples": ["internal", "public", "partner-only"]
+    },
+    "RelationshipType": {
+      "$dynamicAnchor": "common-RelationshipType",
+      "anyOf":[
+        { "type": "string", "enum":["refines","depends_on","relates_to","contradicts","supersedes","example_of"]},
+        { "$ref": "patterns.schema.json#pattern-customRelType" }
+      ],
+      "description":"Type of semantic relationship. Includes a canonical list and allows custom types via pattern.",
+      "examples": ["refines", "depends_on", "custom_link"]
+    },
+    "CustomExtension": {
+      "$dynamicAnchor": "common-CustomExtension",
+      "description": "Defines the structure for custom extension properties (prefixed with 'x_ppl_'). Allows any valid JSON type.",
+      "type": ["string", "number", "boolean", "array", "object", "null"]
+    },
+    "RequirementLevel": {
+        "$anchor": "common-RequirementLevel",
+        "type": "string",
+        "enum": ["MUST", "SHOULD", "MAY"],
+        "description": "Requirement level based on RFC 2119 keywords."
+    }
+  }
+}

@@ -1,0 +1,253 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/schemas/metadata-defs.schema.json",
+  "title": "PPL Schema - Metadata Type Definitions",
+  "description": "Contains definitions related to document metadata for the Project Philosophy Library schema.",
+  "$comment": "These definitions are referenced by other schema definition files.",
+  "$defs": {
+    "Checksum": {
+      "$dynamicAnchor": "metadata-Checksum",
+      "type": "object",
+      "description": "Checksum for integrity verification of the document content.",
+      "properties": {
+        "algorithm": {
+          "type": "string",
+          "enum": ["sha256", "sha512"],
+          "default": "sha256",
+          "description": "Hashing algorithm used."
+        },
+        "value": {
+          "type": "string",
+          "description": "The checksum hash value (hex encoded)."
+        }
+      },
+      "required": ["algorithm", "value"],
+      "dependentSchemas": {
+        "algorithm": {
+          "oneOf": [
+            {
+              "properties": {
+                "algorithm": { "const": "sha256" },
+                "value": { "$ref": "patterns.schema.json#pattern-sha256Hex" }
+              }
+            },
+            {
+              "properties": {
+                "algorithm": { "const": "sha512" },
+                "value": { "$ref": "patterns.schema.json#pattern-sha512Hex" }
+              }
+            }
+          ]
+        }
+      },
+      "patternProperties": {
+        "^x_ppl_": { "$dynamicRef": "common-defs.schema.json#common-CustomExtension" }
+      },
+      "unevaluatedProperties": false,
+      "examples": [
+        {"algorithm": "sha256", "value": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},
+        {"algorithm": "sha512", "value": "cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f2b0ff8318d2877eec2f63b931bd47417a81a538327af927da3e"}
+      ]
+    },
+    "LicenseInfo": {
+      "$dynamicAnchor": "metadata-LicenseInfo",
+      "type": "object",
+      "description": "License information for the document.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "SPDX license identifier (e.g., 'CC-BY-4.0') or custom string (e.g., 'Proprietary', 'SEE LICENSE IN <filename>')."
+        },
+        "url": {
+          "type": "string",
+          "format": "uri",
+          "description": "URL to the full license text. Recommended for non-SPDX IDs."
+        }
+      },
+      "required": ["id"],
+      "dependentSchemas": {
+        "id": {
+          "if": {
+            "properties": {
+              "id": {
+                "not": { "$ref": "patterns.schema.json#pattern-spdxLicenseId" }
+              }
+            }
+          },
+          "then": {
+            "required": ["url"]
+          }
+        }
+      },
+      "patternProperties": {
+        "^x_ppl_": { "$dynamicRef": "common-defs.schema.json#common-CustomExtension" }
+      },
+      "unevaluatedProperties": false,
+      "examples": [
+        {"id": "MIT"},
+        {"id": "CC-BY-SA-4.0"},
+        {"id": "Proprietary - Internal Use Only", "url": "https://internal.example.com/license"}
+      ]
+    },
+    "LlmUsageHints": {
+      "$dynamicAnchor": "metadata-LlmUsageHints",
+      "type": "object",
+      "description": "Hints for AI/LLM processing of the document.",
+      "properties": {
+        "prompt_template": {
+          "type": "string",
+          "$ref": "patterns.schema.json#pattern-filePathOrAnchor",
+          "description": "Reference (relative path or anchor) to a relevant prompt template. WARNING: Path validation is format-only; secure path handling is required by the consuming application."
+        },
+        "embedding_exclude": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "List of section IDs (anchors) or keywords to exclude from embedding generation."
+        }
+      },
+      "patternProperties": {
+        "^x_ppl_": { "$dynamicRef": "common-defs.schema.json#common-CustomExtension" }
+      },
+      "unevaluatedProperties": false,
+      "examples": [
+        {"prompt_template": "./prompts/summarize.txt", "embedding_exclude": ["#appendix", "internal-notes"]},
+        {"embedding_exclude": ["confidential"]}
+      ]
+    },
+    "DeprecationInfo": {
+      "$dynamicAnchor": "metadata-DeprecationInfo",
+      "type": "object",
+      "description": "Information regarding the deprecation of a document or principle.",
+      "properties": {
+        "reason": { "type": "string", "description": "Reason for deprecation." },
+        "replaced_by_doc": { "$ref": "patterns.schema.json#pattern-docId", "description": "ID of the replacement document. Existence MUST be checked externally." },
+        "replaced_by_principle": { "$ref": "patterns.schema.json#pattern-docOrPrincipleId", "description": "ID of the replacement principle (format 'doc_id#principle_id'). Existence MUST be checked externally." },
+        "notes": { "type": "string", "description": "Additional notes regarding deprecation." }
+      },
+      "required": ["reason"],
+      "$comment": "Existence of replacement targets (doc/principle) MUST be checked externally (e.g., via CI).",
+      "patternProperties": {
+        "^x_ppl_": { "$dynamicRef": "common-defs.schema.json#common-CustomExtension" }
+      },
+      "unevaluatedProperties": false,
+      "examples": [
+        {"reason": "Superseded by new guidelines.", "replaced_by_doc": "new-coding-standards-v2"},
+        {"reason": "Principle merged into another.", "replaced_by_principle": "design-principles#di-combined"}
+      ]
+    },
+    "AccessibilityInfo": {
+      "$dynamicAnchor": "metadata-AccessibilityInfo",
+      "type": "object",
+      "description": "Accessibility related information and status.",
+      "properties": {
+        "wcag_level": {
+          "type": "string",
+          "enum": ["A", "AA", "AAA"],
+          "default": "AA",
+          "description": "Target WCAG conformance level."
+        },
+        "remarks": { "type": "string", "description": "Specific accessibility notes or considerations." },
+        "remediations": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "List of known accessibility issues or tasks to be addressed (TODOs)."
+        }
+      },
+      "patternProperties": {
+        "^x_ppl_": { "$dynamicRef": "common-defs.schema.json#common-CustomExtension" }
+      },
+      "unevaluatedProperties": false,
+      "examples": [
+        {"wcag_level": "AA", "remarks": "Color contrast needs review in dark mode."},
+        {"remediations": ["Add alt text to all images.", "Ensure keyboard navigation works."]}
+      ]
+    },
+    "PrerequisiteDocument": {
+      "$dynamicAnchor": "metadata-PrerequisiteDocument",
+      "type": "object",
+      "description": "Reference to an external prerequisite document.",
+      "properties": {
+        "id": { "type": "string", "description": "Unique identifier for the prerequisite (e.g., 'rfc2119')." },
+        "name": { "type": "string", "description": "Full name or title of the prerequisite document." },
+        "url": { "type": "string", "format": "uri", "description": "URL to the prerequisite document." },
+        "version": { "type": "string", "description": "Specific version of the prerequisite document, if applicable." },
+        "description": { "type": "string", "description": "Brief description of why this document is a prerequisite." }
+      },
+      "required": ["id", "name"],
+      "patternProperties": {
+        "^x_ppl_": { "$dynamicRef": "common-defs.schema.json#common-CustomExtension" }
+      },
+      "unevaluatedProperties": false,
+      "examples": [
+        {"id": "rfc2119", "name": "RFC 2119", "url": "https://www.ietf.org/rfc/rfc2119.txt", "description": "Defines requirement levels (MUST, SHOULD, MAY)."}
+      ]
+    },
+    "Reference": {
+      "$dynamicAnchor": "metadata-Reference",
+      "type": "object",
+      "description": "Reference to another PPL document or an external resource.",
+      "properties": {
+        "doc_id": { "$ref": "patterns.schema.json#pattern-docId", "description": "ID of a referenced PPL document. Existence MUST be checked externally." },
+        "url": { "type": "string", "format": "uri", "description": "URL of an external reference." },
+        "title": { "type": "string", "description": "Title or short description of the reference." },
+        "description": { "type": "string", "description": "Additional details about the reference or its relevance." }
+      },
+      "required": ["title"],
+      "oneOf": [
+        {
+          "description": "Reference to an internal PPL document.",
+          "properties": {"doc_id": {}},
+          "required":["doc_id"],
+          "not": { "required": ["url"] }
+        },
+        {
+          "description": "Reference to an external URL.",
+          "properties": {"url": {}},
+          "required":["url"],
+          "not": { "required": ["doc_id"] }
+        }
+      ],
+      "$comment": "Existence of internal 'doc_id' MUST be checked externally (e.g., via CI).",
+      "patternProperties": {
+        "^x_ppl_": { "$dynamicRef": "common-defs.schema.json#common-CustomExtension" }
+      },
+      "unevaluatedProperties": false,
+      "examples": [
+        {"doc_id": "coding-standards", "title": "Coding Standards"},
+        {"url": "https://martinfowler.com/bliki/DependencyInjection.html", "title": "Martin Fowler on Dependency Injection"}
+      ]
+    },
+    "Signature": {
+      "$dynamicAnchor": "metadata-Signature",
+      "type": "object",
+      "description": "Represents a signature applied to the document, verifying its integrity and authenticity.",
+      "properties": {
+        "algorithm": {
+          "type": "string",
+          "enum": ["pgp", "x509"],
+          "description": "Signature algorithm used (e.g., 'pgp' for OpenPGP, 'x509' for X.509 certificates)."
+        },
+        "key_identifier": {
+          "type": "string",
+          "description": "Identifier for the key used for signing (e.g., PGP fingerprint, X.509 Subject Key Identifier, signer's email address)."
+        },
+        "signature_value": {
+           "type": "string",
+           "contentEncoding": "base64",
+           "description": "The actual signature value, typically base64 encoded (e.g., detached PGP signature block)."
+        },
+        "timestamp": {
+           "type": "string",
+           "format": "date-time",
+           "description": "Optional timestamp indicating when the signature was applied (ISO 8601)."
+        }
+      },
+      "required": ["algorithm", "key_identifier", "signature_value"],
+      "patternProperties": { "^x_ppl_": { "$dynamicRef": "common-defs.schema.json#common-CustomExtension" } },
+      "unevaluatedProperties": false,
+      "examples": [
+        {"algorithm": "pgp", "key_identifier": "4AEE 18F8 31C0 4E80 9399  9B08 745C F0AE D846 4657", "signature_value": "BASE64_ENCODED_PGP_SIGNATURE_BLOCK", "timestamp": "2024-04-27T12:00:00Z"}
+      ]
+    }
+  }
+}

@@ -1,0 +1,101 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/schemas/patterns.schema.json",
+  "title": "PPL Schema - Reusable Patterns",
+  "description": "Contains reusable regular expression patterns for the Project Philosophy Library schema.",
+  "$comment": "These patterns are referenced by other schema definition files.",
+  "$defs": {
+    "docId": {
+      "$anchor": "pattern-docId",
+      "type": "string",
+      "description": "Pattern for a document ID. Allows lowercase letters, numbers, hyphens, and dots.",
+      "pattern": "^[a-z0-9\\-\\.]+$"
+    },
+    "docOrPrincipleId": {
+      "$anchor": "pattern-docOrPrincipleId",
+      "type": "string",
+      "description": "Pattern for a document ID or a principle ID within a document (docId#principleId).",
+      "pattern": "^[a-z0-9\\-\\.]+(#.+)?$"
+    },
+    "semVer": {
+      "$anchor": "pattern-semVer",
+      "type": "string",
+      "description": "Pattern for Semantic Versioning 2.0.0 (https://semver.org).",
+      "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-[0-9A-Za-z-.]+)?(?:\\+[0-9A-Za-z-.]+)?$"
+    },
+    "bcp47LangCode": {
+      "$anchor": "pattern-bcp47LangCode",
+      "type": "string",
+      "description": "Pattern for BCP-47 language codes.",
+      "pattern": "^[a-zA-Z]{2,3}(?:-[a-zA-Z0-9]{2,8})*$"
+    },
+    "ownerSlug": {
+      "$anchor": "pattern-ownerSlug",
+      "type": "string",
+      "description": "Pattern for an owner slug (team identifier, not an email). Allows lowercase letters, numbers, underscores, and hyphens.",
+      "pattern": "^(?!.*@)[a-z0-9_-]+$",
+      "minLength": 1
+    },
+    "filePathOrAnchor": {
+      "$anchor": "pattern-filePathOrAnchor",
+      "type": "string",
+      "description": "Pattern for a relative file path (starting with ./ or ../) or an anchor within the same document (starting with #). WARNING: Path validation is format-only; secure path handling is required by the consuming application.",
+      "pattern": "^(#.+|((\\.{1,2}\\/)(?!.*(\\/\\.\\.\\/|\\/\\.\\/|\\/\\/|\\s))[^\/\\s#][^#\\s]*))(#.+)?$"
+    },
+    "sha256Hex": {
+      "$anchor": "pattern-sha256Hex",
+      "type": "string",
+      "description": "Pattern for a SHA-256 hash value (64 hexadecimal characters).",
+      "pattern": "^[A-Fa-f0-9]{64}$"
+    },
+    "sha512Hex": {
+      "$anchor": "pattern-sha512Hex",
+      "type": "string",
+      "description": "Pattern for a SHA-512 hash value (128 hexadecimal characters).",
+      "pattern": "^[A-Fa-f0-9]{128}$"
+    },
+    "spdxLicenseId": {
+      "$anchor": "pattern-spdxLicenseId",
+      "type": "string",
+      "description": "Pattern for SPDX license identifiers.",
+      "pattern": "^[a-zA-Z0-9\\.\\-]+(?: WITH [a-zA-Z0-9\\.\\-]+)?$"
+    },
+    "pgpFingerprint": {
+      "$anchor": "pattern-pgpFingerprint",
+      "type": "string",
+      "description": "Pattern for a PGP key fingerprint (40 or 49 uppercase hex characters, possibly with spaces).",
+      "pattern": "^[A-F0-9 ]{40,49}$"
+    },
+    "snippetPath": {
+      "$anchor": "pattern-snippetPath",
+      "type": "string",
+      "description": "Pattern for a path to a code snippet file located in the './snippets/' directory.",
+      "pattern": "^\\.\\/snippets\\/.+\\.code\\.md$"
+    },
+    "principleId": {
+      "$anchor": "pattern-principleId",
+      "type": "string",
+      "description": "Pattern for a principle ID within a document. Allows lowercase letters, numbers, and hyphens.",
+      "pattern": "^[a-z0-9-]+$"
+    },
+    "contextType": {
+      "$anchor": "pattern-contextType",
+      "type": "string",
+      "description": "Pattern for an applicability context type identifier. Allows lowercase letters, numbers, underscores, and hyphens.",
+      "pattern": "^[a-z0-9_\\-]+$"
+    },
+    "anchorRef": {
+      "$anchor": "pattern-anchorRef",
+      "type": "string",
+      "description": "Pattern for an anchor reference within the same document (must start with #).",
+      "pattern": "^#.+",
+      "examples": ["#section-name", "#core-principle-id"]
+    },
+    "customRelType": {
+      "$anchor": "pattern-customRelType",
+      "type": "string",
+      "description": "Pattern for a custom relationship type identifier. Allows lowercase letters, numbers, underscores, and hyphens.",
+      "pattern": "^[a-z0-9_-]+$"
+    }
+  }
+}

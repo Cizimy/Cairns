@@ -1,0 +1,268 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/schemas/content-defs.schema.json",
+  "title": "PPL Schema - Content Structure Definitions",
+  "description": "Contains definitions related to the structure and content of documents for the Project Philosophy Library schema.",
+  "$comment": "These definitions are referenced by other schema definition files.",
+  "$defs": {
+    "MediaReference": {
+      "$dynamicAnchor": "content-MediaReference",
+      "type": "object",
+      "description": "Reference to an associated media file (e.g., diagram, image).",
+      "properties": {
+        "type": { "type": "string", "description": "Type of media (e.g., 'mermaid', 'drawio', 'image', 'video')." },
+        "path": {
+          "type": "string",
+          "description": "Relative path to the media file. WARNING: Path validation is format-only; secure path handling and existence check are required by the consuming application."
+        },
+        "description": { "type": "string", "description": "Brief description or caption for the media." },
+        "hash": {
+           "type": "string",
+           "description": "Optional checksum hash (e.g., SHA256 hex) for caching or integrity verification."
+        },
+        "width": { "type": "integer", "minimum": 1, "description": "Optional display width in pixels." },
+        "height": { "type": "integer", "minimum": 1, "description": "Optional display height in pixels." },
+        "format": { "type": "string", "description": "Optional media format identifier (e.g., 'png', 'svg', 'mp4')." }
+      },
+      "required": ["path", "type"],
+      "$comment": "Path existence MUST be checked externally (e.g., via CI).",
+      "patternProperties": {
+        "^x_ppl_": { "$dynamicRef": "common-defs.schema.json#common-CustomExtension" }
+      },
+      "unevaluatedProperties": false,
+      "examples": [
+        {"type": "mermaid", "path": "./diagrams/flow.mmd", "description": "Process flowchart"},
+        {"type": "image", "path": "./images/logo.png", "format": "png", "width": 200}
+      ]
+    },
+    "ExceptionPolicy": {
+      "$dynamicAnchor": "content-ExceptionPolicy",
+      "type": "object",
+      "description": "Defines the policy regarding exceptions to the rules or principles in the document.",
+      "properties": {
+        "allowed": { "type": "boolean", "description": "Indicates whether exceptions are generally allowed for this document/principle." },
+        "policy_ref": {
+           "$ref": "patterns.schema.json#pattern-filePathOrAnchor",
+           "description": "Reference (anchor or relative path) to the detailed exception policy or process description. WARNING: Path validation is format-only; secure path handling and existence check are required by the consuming application."
+        }
+      },
+      "required": ["allowed"],
+      "$comment": "If 'policy_ref' points to a file path, its existence MUST be checked externally.",
+      "patternProperties": {
+        "^x_ppl_": { "$dynamicRef": "common-defs.schema.json#common-CustomExtension" }
+      },
+      "unevaluatedProperties": false,
+      "examples": [
+        {"allowed": true, "policy_ref": "#exception-process"},
+        {"allowed": false}
+      ]
+    },
+    "ApplicabilityContext": {
+      "$dynamicAnchor": "content-ApplicabilityContext",
+      "type": "object",
+      "description": "Specifies a context where the document or principle applies.",
+      "properties": {
+        "type": {
+          "$ref": "patterns.schema.json#pattern-contextType",
+          "description": "Type of context. Recommended values include: 'technology', 'project_phase', 'team_type', 'domain', 'product_line', 'regulatory_region'. Use simple, consistent identifiers."
+        },
+        "value": { "type": "string", "description": "Specific value for the context type (e.g., 'react', 'development', 'platform-team', 'finance', 'apollo', 'eu')." }
+      },
+      "required": ["type", "value"],
+      "patternProperties": {
+        "^x_ppl_": { "$dynamicRef": "common-defs.schema.json#common-CustomExtension" }
+      },
+      "unevaluatedProperties": false,
+      "examples": [
+        {"type": "technology", "value": "react"},
+        {"type": "project_phase", "value": "development"},
+        {"type": "domain", "value": "finance"}
+      ]
+    },
+    "Relationship": {
+      "$dynamicAnchor": "content-Relationship",
+      "type": "object",
+      "description": "Defines a semantic relationship between two PPL documents or principles.",
+      "properties": {
+        "from": {
+          "$ref": "patterns.schema.json#pattern-docOrPrincipleId",
+          "description": "Source document/principle ID (e.g., 'doc-a#principle-x' or 'doc-a'). Existence MUST be checked externally."
+        },
+        "to": {
+          "$ref": "patterns.schema.json#pattern-docOrPrincipleId",
+          "description": "Target document/principle ID. Existence MUST be checked externally."
+        },
+        "rel_type": {
+          "$dynamicRef": "common-defs.schema.json#common-RelationshipType"
+        },
+        "strength": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Strength or confidence score of the relationship (0=unrelated, 1=identical). Can be manually assigned or derived from analysis."
+        },
+        "description": { "type": "string", "description": "Optional description clarifying the nature of the relationship." }
+      },
+      "required": ["from", "to"],
+      "dependentSchemas": {
+        "strength": {
+          "if": {
+            "properties": {
+              "strength": { "exclusiveMinimum": 0 }
+            }
+          },
+          "then": {
+            "required": ["rel_type"]
+          }
+        }
+      },
+      "$comment": "Existence of 'from' and 'to' targets (documents or principles within documents) MUST be checked externally (e.g., via CI).",
+      "patternProperties": {
+        "^x_ppl_": { "$dynamicRef": "common-defs.schema.json#common-CustomExtension" }
+      },
+      "unevaluatedProperties": false,
+      "examples": [
+        {"from": "coding-standards#naming", "to": "design-principles#clarity", "rel_type": "refines", "strength": 0.8},
+        {"from": "this-doc#section-a", "to": "external-doc", "rel_type": "relates_to"},
+        {"from": "doc-a", "to": "doc-b", "strength": 0}
+      ]
+    },
+    "LocalizedContent": {
+      "$dynamicAnchor": "content-LocalizedContent",
+      "type": "object",
+      "description": "Provides language-specific overrides for key textual fields.",
+      "properties": {
+        "title": { "type": "string", "description": "Localized document title." },
+        "abstract": { "type": "string", "maxLength": 120, "description": "Localized abstract (~100 chars)." },
+        "summary": { "type": "string", "maxLength": 300, "description": "Localized summary (~300 chars)." },
+        "detail_ref": {
+           "$ref": "patterns.schema.json#pattern-filePathOrAnchor",
+           "description": "Localized reference to the main content (anchor or relative path). WARNING: Path validation is format-only; secure path handling and existence check are required by the consuming application."
+        }
+      },
+      "$comment": "If 'detail_ref' points to a file path, its existence MUST be checked externally.",
+      "patternProperties": {
+        "^x_ppl_": { "$dynamicRef": "common-defs.schema.json#common-CustomExtension" }
+      },
+      "unevaluatedProperties": false,
+      "examples": [
+        {"title": "設計原則 (日本語)", "abstract": "堅牢なソフトウェア設計のためのコア原則を定義します。", "detail_ref": "./content/main_ja.md"},
+        {"title": "Design Principles (English)", "abstract": "Defines core principles for robust software design.", "detail_ref": "./content/main_en.md"}
+      ]
+    },
+    "CorePrinciple": {
+      "$dynamicAnchor": "content-CorePrinciple",
+      "type": "object",
+      "description": "Defines a single core principle within the document.",
+      "properties": {
+        "principle_id": {
+          "$ref": "patterns.schema.json#pattern-principleId",
+          "description": "Unique identifier for the principle within the scope of this document.",
+          "examples": ["solid", "dry"]
+        },
+        "title": {
+          "type": "string",
+          "description": "Human-readable title of the principle.",
+          "examples": ["Single Responsibility Principle", "Don't Repeat Yourself"]
+        },
+        "status": {
+          "$ref": "common-defs.schema.json#common-DocStatusEnum"
+        },
+        "deprecation_info": {
+           "$dynamicRef": "metadata-defs.schema.json#metadata-DeprecationInfo"
+        },
+        "keywords": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "List of keywords specific to this principle for search and categorization.",
+          "examples": [["oop", "maintainability"], ["code-quality", "efficiency"]]
+        },
+        "snippet_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "patterns.schema.json#pattern-snippetPath"
+          },
+          "description": "References to external code snippet files (in './snippets/') illustrating the principle. WARNING: Path validation is format-only; existence check required by the consuming application.",
+          "examples": [["./snippets/srp-good.ts", "./snippets/srp-bad.ts"]]
+        },
+        "target_audience": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Specific target audience or roles for this principle.",
+          "examples": [["all-developers"], ["senior-developers", "architects"]]
+        },
+        "applicable_contexts": {
+          "type": "array",
+          "items": { "$dynamicRef": "#content-ApplicabilityContext" },
+          "description": "Specific contexts where this principle is particularly relevant or applicable."
+        },
+        "requirement_level": {
+          "$ref": "common-defs.schema.json#common-RequirementLevel"
+        },
+        "maturity": {
+          "$dynamicRef": "common-defs.schema.json#common-MaturityLevel"
+        },
+        "risk_level": {
+          "$dynamicRef": "common-defs.schema.json#common-RiskLevel"
+        },
+        "references": {
+          "type": "array",
+          "items": { "$dynamicRef": "metadata-defs.schema.json#metadata-Reference" },
+          "description": "External references (URLs or other PPL documents) specific to this principle."
+        },
+        "abstract": {
+          "type": "string",
+          "maxLength": 120,
+          "description": "Very concise summary of the principle (~100 chars)." ,
+          "examples": ["A class should have only one reason to change."]
+        },
+        "summary": {
+          "type": "string",
+          "maxLength": 300,
+          "description": "Short summary explaining the core idea of the principle (~300 chars).",
+          "examples": ["Each piece of knowledge must have a single, unambiguous, authoritative representation within a system."]
+        },
+        "detail_ref": {
+          "$ref": "patterns.schema.json#pattern-anchorRef",
+          "description": "Anchor reference (starting with #) pointing to the detailed description of this principle within the main Markdown body.",
+          "examples": ["#single-responsibility-details", "#dry-explanation"]
+        }
+      },
+      "required": [
+        "principle_id",
+        "title",
+        "status",
+        "summary",
+        "detail_ref"
+      ],
+      "dependentSchemas": {
+        "status": {
+          "if": {
+            "properties": { "status": { "const": "DEPRECATED" } },
+            "required": ["status"]
+          },
+          "then": {
+            "required": ["deprecation_info"]
+          }
+        }
+      },
+      "$comment": "The 'detail_ref' anchor MUST correspond to a heading in the Markdown body.",
+      "patternProperties": {
+        "^x_ppl_": { "$dynamicRef": "common-defs.schema.json#common-CustomExtension" }
+      },
+      "unevaluatedProperties": false,
+      "examples": [
+        {
+          "principle_id": "srp",
+          "title": "Single Responsibility Principle",
+          "status": "APPROVED",
+          "keywords": ["solid", "oop"],
+          "requirement_level": "MUST",
+          "abstract": "A class should have only one reason to change.",
+          "summary": "Ensures that a class is focused on a single task, improving cohesion and reducing coupling.",
+          "detail_ref": "#srp-details"
+        }
+      ]
+    }
+  }
+}
