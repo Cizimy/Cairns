@@ -103,5 +103,3 @@ secrets.*
 ~$*
 
 # Add project specific temporary files or build outputs below if necessary
-# Ignore development documents
-_dev_docs/
