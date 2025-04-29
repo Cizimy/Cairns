@@ -9,7 +9,7 @@
       "$anchor": "pattern-docId",
       "type": "string",
       "description": "Pattern for a document ID. Allows lowercase letters, numbers, hyphens, and dots.",
-      "pattern": "^[a-z0-9\\-\\.]+$"
+      "pattern": "^[a-z0-9\\-]+$"
     },
     "docOrPrincipleId": {
       "$anchor": "pattern-docOrPrincipleId",
