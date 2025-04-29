@@ -1,0 +1,27 @@
+name: "❓ 質問/議論"
+description: "Cairnsの内容、運用、方針に関する一般的な質問や議論を開始します。"
+title: "❓ [質問/議論のトピック]"
+labels: ["question", "discussion"]
+assignees: []
+body:
+  - type: textarea
+    id: topic
+    attributes:
+      label: "質問/議論したい内容"
+      description: "具体的に何について質問または議論したいですか？"
+      placeholder: "例: L5ドキュメントで core_principles を省略する場合の具体的なユースケースについて議論したい。"
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: "背景/コンテキスト (任意)"
+      description: "質問や議論の背景となる情報があれば記載してください。"
+    validations:
+      required: false
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        **Note:** 関連するCairnsドキュメントがあれば、そのIDを記載すると議論がスムーズになります。
+        貢献に関する詳細は [`l0-contribution-guide.md`](./docs/L0-library-overview/l0-contribution-guide.md) を参照してください。

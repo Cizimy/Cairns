@@ -1,0 +1,48 @@
+name: "✨ 機能リクエスト"
+description: "CI/CD、スキーマ、静的サイト、その他ツールに関する新機能や改善を提案します。"
+title: "✨ [機能リクエストの要約]"
+labels: ["enhancement", "feature"]
+assignees: []
+body:
+  - type: dropdown
+    id: component
+    attributes:
+      label: "関連コンポーネント"
+      description: "このリクエストが関連する領域を選択してください。"
+      options:
+        - CI/CD
+        - JSON Schema
+        - Static Site Generator (SSG)
+        - Tooling (開発補助ツール等)
+        - Governance Process
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: "現状の問題点 / 機能が必要な背景"
+      description: "どのような課題がありますか？ なぜこの機能が必要ですか？"
+      placeholder: "例: 現在、ドキュメント間の参照切れがCIで検出されず、リンク切れが発生しやすい。"
+    validations:
+      required: true
+  - type: textarea
+    id: proposed-feature
+    attributes:
+      label: "提案する機能/改善"
+      description: "どのような機能や改善を提案しますか？ 具体的に記述してください。"
+      placeholder: "例: CIパイプラインに、YAML Front Matter内の detail_ref, relationships, snippet_refs 等の参照先が存在するかチェックするステップを追加する。"
+    validations:
+      required: true
+  - type: textarea
+    id: benefits
+    attributes:
+      label: "期待される効果/メリット"
+      description: "この機能が実現されると、どのような良いことがありますか？"
+    validations:
+      required: true
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        **Note:** 貢献に関する詳細は [`l0-contribution-guide.md`](./docs/L0-library-overview/l0-contribution-guide.md) を参照してください。

@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://example.com/schemas/patterns.schema.json",
-  "title": "PPL Schema - Reusable Patterns",
+  "title": "Cairns Schema - Reusable Patterns",
   "description": "Contains reusable regular expression patterns for the Project Philosophy Library schema.",
   "$comment": "These patterns are referenced by other schema definition files.",
   "$defs": {

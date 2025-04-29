@@ -1,0 +1,46 @@
+name: "📝 ドキュメント改善提案"
+description: "既存のCairnsドキュメントの改善を提案します。"
+title: "📝 [対象ドキュメントID] の改善提案"
+labels: ["enhancement", "documentation"]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **ドキュメント改善提案ありがとうございます！**
+        より良いCairnsのために、具体的な改善案をご提案ください。
+  - type: input
+    id: target-doc-id
+    attributes:
+      label: "対象ドキュメントID"
+      description: "改善を提案するCairnsドキュメントのIDを記載してください。"
+      placeholder: "例: l3-development-workflow.md"
+    validations:
+      required: true
+  - type: textarea
+    id: proposal-summary
+    attributes:
+      label: "改善提案の概要"
+      description: "どのような改善を提案しますか？"
+      placeholder: "例: ブランチ戦略のセクションに図を追加し、説明を補足する。"
+    validations:
+      required: true
+  - type: textarea
+    id: reason
+    attributes:
+      label: "提案理由"
+      description: "なぜこの改善が必要だと考えますか？ 現状の何が問題ですか？"
+    validations:
+      required: true
+  - type: textarea
+    id: specific-changes
+    attributes:
+      label: "具体的な変更内容 (任意)"
+      description: "可能であれば、具体的な変更案（Markdown差分、修正後の文章案など）を記載してください。"
+    validations:
+      required: false
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        **Note:** 貢献に関する詳細は [`l0-contribution-guide.md`](./docs/L0-library-overview/l0-contribution-guide.md) を参照してください。

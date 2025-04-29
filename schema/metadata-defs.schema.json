@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://example.com/schemas/metadata-defs.schema.json",
-  "title": "PPL Schema - Metadata Type Definitions",
+  "title": "Cairns Schema - Metadata Type Definitions",
   "description": "Contains definitions related to document metadata for the Project Philosophy Library schema.",
   "$comment": "These definitions are referenced by other schema definition files.",
   "$defs": {
@@ -41,7 +41,7 @@
         }
       },
       "patternProperties": {
-        "^x_ppl_": { "$dynamicRef": "common-defs.schema.json#common-CustomExtension" }
+        "^x_cairns_": { "$dynamicRef": "common-defs.schema.json#common-CustomExtension" }
       },
       "unevaluatedProperties": false,
       "examples": [
@@ -80,7 +80,7 @@
         }
       },
       "patternProperties": {
-        "^x_ppl_": { "$dynamicRef": "common-defs.schema.json#common-CustomExtension" }
+        "^x_cairns_": { "$dynamicRef": "common-defs.schema.json#common-CustomExtension" }
       },
       "unevaluatedProperties": false,
       "examples": [
@@ -106,7 +106,7 @@
         }
       },
       "patternProperties": {
-        "^x_ppl_": { "$dynamicRef": "common-defs.schema.json#common-CustomExtension" }
+        "^x_cairns_": { "$dynamicRef": "common-defs.schema.json#common-CustomExtension" }
       },
       "unevaluatedProperties": false,
       "examples": [
@@ -127,7 +127,7 @@
       "required": ["reason"],
       "$comment": "Existence of replacement targets (doc/principle) MUST be checked externally (e.g., via CI).",
       "patternProperties": {
-        "^x_ppl_": { "$dynamicRef": "common-defs.schema.json#common-CustomExtension" }
+        "^x_cairns_": { "$dynamicRef": "common-defs.schema.json#common-CustomExtension" }
       },
       "unevaluatedProperties": false,
       "examples": [
@@ -154,7 +154,7 @@
         }
       },
       "patternProperties": {
-        "^x_ppl_": { "$dynamicRef": "common-defs.schema.json#common-CustomExtension" }
+        "^x_cairns_": { "$dynamicRef": "common-defs.schema.json#common-CustomExtension" }
       },
       "unevaluatedProperties": false,
       "examples": [
@@ -175,7 +175,7 @@
       },
       "required": ["id", "name"],
       "patternProperties": {
-        "^x_ppl_": { "$dynamicRef": "common-defs.schema.json#common-CustomExtension" }
+        "^x_cairns_": { "$dynamicRef": "common-defs.schema.json#common-CustomExtension" }
       },
       "unevaluatedProperties": false,
       "examples": [
@@ -185,9 +185,9 @@
     "Reference": {
       "$dynamicAnchor": "metadata-Reference",
       "type": "object",
-      "description": "Reference to another PPL document or an external resource.",
+      "description": "Reference to another Cairns document or an external resource.",
       "properties": {
-        "doc_id": { "$ref": "patterns.schema.json#pattern-docId", "description": "ID of a referenced PPL document. Existence MUST be checked externally." },
+        "doc_id": { "$ref": "patterns.schema.json#pattern-docId", "description": "ID of a referenced Cairns document. Existence MUST be checked externally." },
         "url": { "type": "string", "format": "uri", "description": "URL of an external reference." },
         "title": { "type": "string", "description": "Title or short description of the reference." },
         "description": { "type": "string", "description": "Additional details about the reference or its relevance." }
@@ -195,7 +195,7 @@
       "required": ["title"],
       "oneOf": [
         {
-          "description": "Reference to an internal PPL document.",
+          "description": "Reference to an internal Cairns document.",
           "properties": {"doc_id": {}},
           "required":["doc_id"],
           "not": { "required": ["url"] }
@@ -209,7 +209,7 @@
       ],
       "$comment": "Existence of internal 'doc_id' MUST be checked externally (e.g., via CI).",
       "patternProperties": {
-        "^x_ppl_": { "$dynamicRef": "common-defs.schema.json#common-CustomExtension" }
+        "^x_cairns_": { "$dynamicRef": "common-defs.schema.json#common-CustomExtension" }
       },
       "unevaluatedProperties": false,
       "examples": [
@@ -243,7 +243,7 @@
         }
       },
       "required": ["algorithm", "key_identifier", "signature_value"],
-      "patternProperties": { "^x_ppl_": { "$dynamicRef": "common-defs.schema.json#common-CustomExtension" } },
+      "patternProperties": { "^x_cairns_": { "$dynamicRef": "common-defs.schema.json#common-CustomExtension" } },
       "unevaluatedProperties": false,
       "examples": [
         {"algorithm": "pgp", "key_identifier": "4AEE 18F8 31C0 4E80 9399  9B08 745C F0AE D846 4657", "signature_value": "BASE64_ENCODED_PGP_SIGNATURE_BLOCK", "timestamp": "2024-04-27T12:00:00Z"}

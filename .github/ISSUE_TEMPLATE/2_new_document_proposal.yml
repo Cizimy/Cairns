@@ -1,0 +1,89 @@
+name: "📄 新規Cairnsドキュメント提案"
+description: "新しいCairnsドキュメントの作成を提案します。"
+title: "📄 新規提案: [提案ドキュメントID]"
+labels: ["proposal", "documentation"]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **新規ドキュメント提案ありがとうございます！**
+        作成に着手する前に、以下の項目について提案内容を記述し、関係者間での認識合わせや議論を行いましょう。
+  - type: input
+    id: proposed-id
+    attributes:
+      label: "提案ドキュメントID (案)"
+      description: "Cairns内で一意となるIDを提案してください（例: l4-database-design-guidelines-postgres）。ファイル名と一致させます。"
+      placeholder: "lX-topic-subtopic"
+    validations:
+      required: true
+  - type: input
+    id: proposed-title
+    attributes:
+      label: "提案タイトル (案)"
+      description: "ドキュメントのタイトル案を記載してください。"
+    validations:
+      required: true
+  - type: dropdown
+    id: layer
+    attributes:
+      label: "所属レイヤー (`layer`)"
+      description: "提案するドキュメントが属するCairnsのレイヤーを選択してください。"
+      options:
+        - "L0: Library Overview"
+        - "L1: Foundation/Philosophy"
+        - "L2: General Engineering Principles"
+        - "L3: Process & Collaboration"
+        - "L4: Domain-Specific Guidelines"
+        - "L5: Ops & Runtime"
+    validations:
+      required: true
+  - type: dropdown
+    id: doc-type
+    attributes:
+      label: "ドキュメントタイプ (`doc_type`)"
+      description: "ドキュメントの種類を選択してください（JSON Schema v2.0.1 準拠）。新しいタイプが必要な場合は、別途スキーマ変更を提案してください。"
+      options:
+        - guideline
+        - reference
+        - playbook
+        - adr_template
+        - policy
+        - report
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: "目的とスコープ"
+      description: "このドキュメントが解決する課題、主な対象読者、扱わない内容などを明確に記載してください。"
+    validations:
+      required: true
+  - type: textarea
+    id: core-principles-overview
+    attributes:
+      label: "想定されるコア原則 (`core_principles`) の概要 (L0-L4の場合)"
+      description: "L0-L4レイヤーの場合、このドキュメントで定義する主要な原則の概要を記載してください。"
+    validations:
+      required: false # L5では不要なためfalse
+  - type: textarea
+    id: relationships
+    attributes:
+      label: "既存ドキュメントとの関連性 (`relationships`)"
+      description: "関連、依存、具体化する既存のCairnsドキュメントIDとその関係性（refines, depends_on など）を記載してください。"
+      placeholder: "例: l2-data-management-principles (refines), l1-software-development-philosophy (depends_on)"
+    validations:
+      required: false
+  - type: textarea
+    id: content-overview
+    attributes:
+      label: "記載内容の概要"
+      description: "どのようなトピックやセクションを含める予定か、概要を記載してください。"
+    validations:
+      required: true
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        **Note:** 貢献に関する詳細は [`l0-contribution-guide.md`](./docs/L0-library-overview/l0-contribution-guide.md) を参照してください。
+        `Document map` の 「PR前の草稿プロセス活用」 のベストプラクティスも参考にしてください。
