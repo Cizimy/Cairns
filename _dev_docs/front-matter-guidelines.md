@@ -590,3 +590,95 @@ JSON Schema による基本的な構造チェックに加え、カスタム検�
 
 -----
 
+## 2.5. CI における検証 <a id="ci-validation"></a>
+
+これまでのセクション (2.1〜2.4) では、Cairns ドキュメントの品質を維持し、開発者体験 (DX) を向上させるための**ローカル検証**の重要性と具体的な方法について解説してきました。本セクションでは、それらの検証がプロジェクトの継続的インテグレーション/継続的デリバリー (CI/CD) パイプラインにおいてどのように実行され、リポジトリ全体の品質保証にどう貢献するのかを説明します。
+
+CI/CD パイプラインにおける自動検証は、ローカルでのチェックを補完し、プロジェクト全体の品質を維持するための**品質ゲート**として機能します。ローカル検証を励行することで CI でのエラーを未然に防ぐことが強く推奨されますが、CI の仕組みを理解することも重要です。
+
+### 2.5.1. CI 検証の目的と位置づけ <a id="purpose-and-positioning-of-ci-validation"></a>
+
+CI/CD パイプライン (例: GitHub Actions - [`devtools-list.md`](../devtools-list.md) A5: CI/CD プラットフォーム 参照) での自動検証は、プロジェクト全体の品質を維持するための**品質保証プロセス**です。
+主な目的は以下の通りです。
+
+  * ローカル検証 (セクション 2.1-2.4 参照) で見逃された可能性のあるエラーや規約違反を検出する。
+  * `main` ブランチなど、保護されたブランチへのマージ前に、ドキュメントが定義された品質基準を満たしていることを保証する。
+  * プロジェクト全体の整合性と一貫性を自動的に維持する。
+
+ローカル検証は**開発者への早期フィードバック**を提供し開発効率を高めるために不可欠ですが、CI 検証は**リポジトリ全体の品質を最終的に担保**する役割を担います。両者は補完関係にあり、効果的な品質管理には双方の実施が重要です ([`document-map.md`](../document-map.md) の品質維持プロセス定義も参照)。
+
+### 2.5.2. CI 検証における注意点 <a id="ci-validation-caveats"></a>
+
+CI 検証は効果的な品質保証プロセスですが、以下の点に留意が必要です。
+
+  * **実行時間:** ドキュメント数や検証ルールの複雑さが増すにつれて、CI の実行時間が長くなる可能性があります。特に全ドキュメントを対象とするカスタムルール検証 ([`devtools-list.md`](../devtools-list.md) A6.1: カスタム検証のパフォーマンス考慮事項 参照) は影響を受けやすいです。
+  * **環境差異:** ローカルの開発環境と CI 実行環境 (OS, ツールバージョン等) のわずかな違いが、稀に予期せぬ検証結果の違いを生む可能性があります。
+  * **カスタムスクリプトの保守:** Cairns 固有のルールを検証する**カスタム検証スクリプト群** (例: `scripts/` ディレクトリ配下に配置。関連ツールは [`devtools-list.md`](../devtools-list.md) A3: スキーマ検証, A6: カスタム検証, B2: RAG Index 生成, B3: Checksum 検証, B4: 署名検証 参照) は CI の中核ですが、これらのスクリプト自体もプロジェクトの進化に合わせて継続的に保守・改善していく必要があります。（**※実際のスクリプト名や構成はプロジェクトの実装や [`devtools-list.md`](../devtools-list.md) の A3, A6, B2-B4 を参照してください**）
+
+これらの注意点からも、CI でのエラーを未然に防ぎ、手戻りを減らすために、**可能な限りローカル環境で問題を特定・修正しておくこと**が推奨されます ([`devtools-list.md`](../devtools-list.md) A7: 開発者体験支援 参照)。
+
+### 2.5.3. CI で実行される主な検証・処理項目 <a id="main-validation-items-in-ci"></a>
+
+CI パイプラインでは、[`devtools-list.md`](../devtools-list.md) (ツールリスト) や [`document-map.md`](../document-map.md) (ドキュメント体系) で定義されたツールとルールに基づき、主に以下の検証や関連処理が自動的に実行されます。
+
+  * **構文・スタイルチェック:**
+      * YAML Lint (`yamllint` - [`devtools-list.md`](../devtools-list.md) A1: YAML Linter): Front Matter の基本的な YAML 構文とスタイル規約 (`.yamllint`) をチェック。
+      * Markdown Lint (`markdownlint-cli2` - [`devtools-list.md`](../devtools-list.md) A2: Markdown Linter): Markdown 本文の構文とスタイル規約 (`.markdownlint-cli2.*`) をチェック。
+  * **Front Matter スキーマ検証:**
+      * [JSON Schema](../../schema/cairns-front-matter.schema.json) ([`devtools-list.md`](../devtools-list.md) A3: JSON Schema Validator スクリプト参照) への準拠を、カスタムスクリプトを用いて**厳密に**検証 (Draft 2020-12 の高度な機能を含む)。
+  * **Cairns 固有カスタムルール検証:**
+      * **カスタム検証スクリプト群** (例: `scripts/` 配下。[`devtools-list.md`](../devtools-list.md) A6: カスタム検証スクリプト 参照) により、スキーマだけでは表現できないプロジェクト固有のルールを網羅的にチェックします。（**※実際のスクリプト名や構成はプロジェクトの実装や [`devtools-list.md`](../devtools-list.md) の A6 を参照してください**）
+      * 主な検証カテゴリは以下の通りです (**各ルールの違反例については [セクション 2.4.2](#custom-validation-rule-violation-errors-example) を、ルールの網羅的な詳細については [今後のセクション 5](#section-5-custom-validation-rules-details) で解説予定です**):
+          * **ID 整合性:** `id` とファイル名の一致、ID の一意性など。
+          * **参照整合性:** 内部リンク、スニペット、メディアファイル等の参照先の存在確認など。
+          * **時間整合性・有効期限チェック:** 日時フィールド間の順序関係 (`created_at`, `last_updated`, `expires_at`) や有効期限 (`review_cycle_days`) の確認など。
+          * **構造整合性:** ドキュメントレイヤーに応じた `core_principles` の記述ルールなど。
+          * **言語整合性:** `language`, `preferred_langs`, `localized_overrides` 間の整合性や、BCP-47 フォーマットの検証 (例: [`devtools-list.md`](../devtools-list.md) A6.4: 言語整合性 で推奨される `langcodes` ライブラリを利用)。
+          * **状態整合性:** `status` フィールドと関連フィールド (`deprecation_info`, `license`, `checksum`, `signed_by`) の整合性検証。これには、特定ステータス (`APPROVED`/`FIXED`) における **Checksum 検証** ([`devtools-list.md`](../devtools-list.md) B3: Checksum 生成・検証ツール) や**署名検証** ([`devtools-list.md`](../devtools-list.md) B4: 署名検証ツール) が含まれます。**(※署名検証 (B4) の導入には、GitHub Actions Secrets 等を利用した鍵管理プロセスの確立が前提となります。詳細は [`devtools-list.md`](../devtools-list.md) B4: 署名検証ツール の導入方針/備考を参照してください)**
+  * **RAG Index 生成:**
+      * RAG (Retrieval-Augmented Generation) システムとの連携準備として、インデックスファイル (`index.ndjson`) を生成します (詳細は [`devtools-list.md`](../devtools-list.md) B2: RAG Index 生成ツール 参照)。
+
+これらの検証や処理は、リポジトリの `.github/workflows/` ディレクトリ内で定義された GitHub Actions ワークフロー ([`devtools-list.md`](../devtools-list.md) A5 参照) によって実行されます。
+
+### 2.5.4. 実行タイミングとフィードバック <a id="execution-timing-and-feedback-in-ci"></a>
+
+CI 検証は、通常、以下のタイミングで GitHub Actions ワークフロー ([`devtools-list.md`](../devtools-list.md) A5: CI/CD プラットフォーム 参照) によって自動的にトリガーされます。
+
+  * Pull Request (PR) の作成時または更新時
+  * 特定のブランチ (例: `main`) への push 時
+
+検証結果は、以下のような形で開発者にフィードバックされます。
+
+  * **GitHub Checks:** PR 画面に、各検証ステップ（Lint, Schema Check, Custom Rules Check など）の成功/失敗ステータスが表示されます。
+  * **ログ:** 各ステップの詳細な実行ログを確認でき、エラーが発生した場合は具体的なエラーメッセージ（[セクション 2.4](#common-errors-and-troubleshooting) で解説したようなメッセージ）と発生箇所を特定できます。
+  * **(設定により)** **インラインコメント:** Lint 違反などが PR の該当行に直接コメントとして表示される場合があります (`reviewdog/action-yamllint` など)。
+  * **マージブロック:** 必須チェックとして設定された検証が失敗した場合、PR のマージが自動的にブロックされます ([`devtools-list.md`](../devtools-list.md) A5.3: PRフィードバック/マージブロック)。
+
+CI でエラーが検出された場合、開発者はフィードバックを確認し、ローカル環境で問題を修正して再度 push する必要があります。
+
+### 2.5.5. ローカル検証の再推奨 <a id="re-recommendation-of-local-validation"></a>
+
+CI はプロジェクト全体の品質を担保する重要なプロセスですが、CI で初めてエラーを発見することは、開発サイクル全体を遅延させる可能性があります。**CI でのエラーは、修正・再プッシュ・再実行といった手戻りを発生させるため、[セクション 2.1](#why-is-local-validation-necessary) で述べたローカル検証が、CI 段階での手戻りを未然に防ぐ上で極めて重要です。特に、[セクション 2.1.3](#dx-gap-completion) や [セクション 2.3.1.2](#limitations-custom-rules-not-supported-etc) で述べたように、VSCode などのエディタ拡張機能だけでは検知できない Cairns 固有のカスタムルール違反や、高度なスキーマ機能に関するエラーも存在するため、ローカル検証スクリプトの実行が不可欠となります。**
+
+開発効率と生産性を最大限に高めるためには、CI に依存するのではなく、コードをコミットまたは push する前に、必ずローカル環境で検証を実行することを強く推奨します。
+
+  * **推奨コマンド:** (実際のコマンドは、プロジェクトルートの **`package.json` の `scripts` セクション** や `Makefile` 等を確認してください)
+    ```bash
+    # 例: リポジトリ全体のドキュメントを検証する場合 (package.json 内のスクリプト名は例です)
+    npm run validate:all
+    # または
+    # npm run validate
+
+    # 例: 特定のファイルやディレクトリを検証する場合 (引数を取るスクリプトが定義されている場合)
+    npm run validate <ファイルパス または ディレクトリパス>
+    # 例) npm run validate docs/L2-principles/l2-design-principles.md
+    # 例) npm run validate docs/L4-domain/js-stack/
+
+    # 例: Makefile が定義されている場合
+    # make validate
+    ```
+
+[セクション 2.3.2](#recommended-complete-validation-via-custom-validation-script) で解説したカスタム検証スクリプトは、CI で実行される検証と**同等のチェック** (VSCode 拡張機能ではカバーしきれないチェックを含む) をローカルで実行できるように設計されています。ローカル検証を習慣づけることで、CI でのエラーを未然に防ぎ、よりスムーズで快適な開発プロセスを実現できます。**CI でのエラー修正にかかる時間を削減するためにも、ローカルでの事前検証を積極的に活用しましょう。**
+
+-----
+

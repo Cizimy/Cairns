@@ -309,6 +309,8 @@ export function replacePlaceholders(templateContent, data) {
     result = result.replace(/\{\{\s*MICRO_TASK\s*\}\}/g, () => data.microTask || '');
     result = result.replace(/\{\{\s*PLOT_YAML\s*\}\}/g, () => data.plot ?? ''); // Use ?? for nullish coalescing
     result = result.replace(/\{\{\s*DRAFT_MD\s*\}\}/g, () => data.draft ?? ''); // Use ?? for nullish coalescing
+    // Add REVIEW_MD replacement
+    result = result.replace(/\{\{\s*REVIEW_MD\s*\}\}/g, () => data.review ?? ''); // Use ?? for nullish coalescing
     // Re-add REPOMIX_OUTPUT replacement
     result = result.replace(/\{\{\s*REPOMIX_OUTPUT\s*\}\}/g, () => data.repomix ?? '<!-- repomix-output.md not found or empty -->');
     result = result.replace(/\{\{\s*TARGET_DOC_FULL\s*\}\}/g, () => data.targetDoc || '');
@@ -367,7 +369,7 @@ export async function main() {
       alias: 'p',
       description: '生成するプロンプトの種類',
       type: 'string',
-      choices: ['writer', 'plot-reviewer', 'draft-reviewer'],
+      choices: ['writer', 'plot-reviewer', 'draft-reviewer', 'rewriter'], // Add 'rewriter'
       demandOption: true,
     })
     .option('output', {
@@ -411,9 +413,16 @@ export async function main() {
       plotContent = await readFileContent(path.join('temp-documentation-support', 'plot.yaml'), 'Plot YAML');
     }
     let draftContent = null;
-    if (argv.promptType === 'draft-reviewer') {
+    // Read draft if type is draft-reviewer OR rewriter
+    if (argv.promptType === 'draft-reviewer' || argv.promptType === 'rewriter') {
       // console.log('--- Debug: Reading draft file ---'); // DEBUG LOG removed
       draftContent = await readFileContent(path.join('temp-documentation-support', 'draft.md'), 'Draft Markdown');
+    }
+    let reviewContent = null; // Initialize reviewContent
+    // Read review if type is rewriter
+    if (argv.promptType === 'rewriter') {
+        // console.log('--- Debug: Reading review file ---'); // DEBUG LOG removed
+        reviewContent = await readFileContent(path.join('temp-documentation-support', 'review.md'), 'Review Markdown');
     }
 
     // console.log('--- Debug: Calling determineNextScope ---'); // DEBUG LOG removed
@@ -436,6 +445,7 @@ export async function main() {
       repomix: repomixContent, // Pass repomix content
       plot: plotContent,
       draft: draftContent,
+      review: reviewContent, // Pass review content
       targetDoc: targetDocContent,
       currentScope: currentScope, // Already cleaned
       sectionStructure: sectionStructure, // Already cleaned
