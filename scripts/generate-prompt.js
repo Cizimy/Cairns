@@ -71,7 +71,9 @@ export function extractHeadings(content) {
         const headings = [];
         visit(tree, 'heading', (node) => {
             // Use toString to get the full text content of the heading
-            const fullHeadingText = toString(node);
+            // Use toString to get the full text content, then remove HTML tags
+            const rawText = toString(node);
+            const fullHeadingText = rawText.replace(/<[^>]*>/g, ''); // Remove HTML tags
             // Basic trim for now, granularity extraction will happen in parseSectionListStructure
             headings.push({
                 depth: node.depth,
