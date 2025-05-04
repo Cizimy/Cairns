@@ -122,3 +122,8 @@ secrets.*
 # Add project specific temporary files or build outputs below if necessary
 # Example:
 # temp_data/
+temp-documentation-support/
+repomix.config.json
+.repomixignore
+repomix-output.md
+temp-generated-prompt.md

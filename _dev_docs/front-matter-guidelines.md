@@ -349,3 +349,244 @@ Cairns プロジェクトの **全ての** 検証ルール (JSON Schema の厳�
 
 -----
 
+### 2.4. よくあるエラーとその対処法
+
+このセクションでは、セクション 2.3.2 で解説したカスタム検証スクリプトを実行した際に遭遇する可能性のある、典型的なエラーメッセージとその原因、具体的な対処法を解説します。
+ここで紹介するエラーは、JSON Schema による構造的な違反と、Cairns プロジェクト固有のカスタムルール違反に大別されます。
+これらのエラーをローカルで早期に特定し修正することで、CI/CD パイプラインでの失敗を防ぎ、開発プロセスをスムーズに進めることができます。
+
+#### 2.4.1. スキーマ違反エラー (例)
+
+カスタム検証スクリプトは、まず [`schema/cairns-front-matter.schema.json`](../../schema/cairns-front-matter.schema.json) に基づいて Front Matter の基本的な構造を検証します (セクション 2.3.2.2 ステップ 3 参照)。
+ここでは、このスキーマ検証でよく発生するエラーの例を示します。
+
+**注意:** VSCode 拡張機能 (`redhat.vscode-yaml` 等) でも、これらの基本的なスキーマ違反の一部はリアルタイムで検出される可能性があります。しかし、セクション 2.1.3 および 2.3.1.2 で述べた通り、拡張機能は JSON Schema Draft 2020-12 の高度な機能 (例: `$dynamicRef`) を完全にはサポートしていない可能性があり、またカスタムルールは一切検証できません。したがって、**カスタム検証スクリプトによるチェックが、スキーマ適合性を確認する最も信頼性の高い方法であり、コミット前には必須**となります。
+
+##### 2.4.1.1. 型間違い
+
+  * **典型的なエラーメッセージ:**
+
+    ```
+    Error: Schema validation failed for 'docs/L2-principles/l2-sample.md':
+     - Path: /review_cycle_days | Message: must be integer | Details: {"type":"integer"} | Value: "90"
+    ```
+
+  * **原因:**
+    Front Matter のフィールドに、JSON Schema で定義されたデータ型 (例: `string`, `integer`, `boolean`, `array`, `object`) と異なる型の値が指定されています。
+    上記例では、`review_cycle_days` フィールド (スキーマ定義: `metadata-defs.schema.json` -\> `integer`) に文字列 (`"90"` など) が指定されている場合に発生します。
+    各フィールドの正しいデータ型は [`schema/cairns-front-matter.schema.json`](../../schema/cairns-front-matter.schema.json) およびそれが参照する `*-defs.schema.json` ファイルで定義されています。
+
+  * **対処法:**
+
+    1.  エラーメッセージで指摘されたフィールド (`review_cycle_days` など) とその値 (`Value: "90"` など) を確認します。
+    2.  エラーメッセージ内の期待される型 (`Message: must be integer` など) や、`_dev_docs/front-matter-guidelines.md` のフィールド解説セクション、または [`schema/cairns-front-matter.schema.json`](../../schema/cairns-front-matter.schema.json) (及び関連スキーマ) を参照し、該当フィールドに期待される正しいデータ型 (例: `integer`) を確認します。
+    3.  値を正しいデータ型に修正します (例: `"90"` (文字列) を `90` (数値) に修正)。
+
+##### 2.4.1.2. パターン不一致 (`id` 等)
+
+  * **典型的なエラーメッセージ:**
+
+    ```
+    Error: Schema validation failed for 'docs/L2-principles/L2-Sample_Doc.md':
+     - Path: /id | Message: must match pattern "^[a-z0-9\\-\\.]+$" | Details: {"pattern":"^[a-z0-9\\-\\.]+$"} | Value: "L2-Sample_Doc"
+    ```
+
+  * **原因:**
+    Front Matter のフィールドに、JSON Schema ([`schema/patterns.schema.json`](../../schema/patterns.schema.json)) で定義された正規表現パターン (`pattern`) に一致しない値が指定されています。
+    上記例は、`id` フィールド ([`patterns.schema.json#pattern-docId`](../../schema/patterns.schema.json)) で、許可されていない文字 (例: 大文字 `L`, `S`, `D` やアンダースコア `_`) が使用されている場合に発生します。
+    **重要:** スキーマパターン (`^[a-z0-9\\-\\.]+$`) ではドット (`.`) が許可されていますが、Cairns の命名規則 ([`naming-conventions.md`](../naming-conventions.md)) では**ハイフン (`-`) のみを推奨**しています。カスタム検証スクリプトは ID 整合性チェック (2.4.2.1 参照) で**命名規則違反も検出**するため、スキーマのパターンには一致していても、命名規則違反としてエラーになる可能性があります。**混乱を避けるため、常に [`naming-conventions.md`](../naming-conventions.md) の規約に従うことを強く推奨します。**
+    他にも `version` (SemVer [`patterns.schema.json#pattern-semVer`](../../schema/patterns.schema.json))、`language` (BCP-47 [`patterns.schema.json#pattern-bcp47LangCode`](../../schema/patterns.schema.json)) など、多くのフィールドでパターンが定義されています。
+
+  * **対処法:**
+
+    1.  エラーメッセージで指摘されたフィールド (`id` など) とその値 (`Value: "L2-Sample_Doc"` など) を確認します。
+    2.  エラーメッセージ内の期待されるパターン (`Message: must match pattern "..."` など) や、`_dev_docs/front-matter-guidelines.md` のフィールド解説、[`schema/patterns.schema.json`](../../schema/patterns.schema.json)、そして**最優先で [`naming-conventions.md`](../naming-conventions.md) を参照**し、期待されるフォーマットを確認します。
+    3.  値をパターンおよび**命名規則**に一致するように修正します (例: `id` を小文字とハイフンのみに修正: `'L2-Sample_Doc'` -\> `'l2-sample-doc'`)。
+
+##### 2.4.1.3. 日時フォーマット (`last_updated` 等)
+
+  * **典型的なエラーメッセージ:**
+
+    ```
+    Error: Schema validation failed for 'docs/L3-process/l3-workflow.md':
+     - Path: /last_updated | Message: must match format "date-time" | Details: {"format":"date-time"} | Value: "2025/04/30 10:00"
+    ```
+
+  * **原因:**
+    日時の指定が期待されるフィールド (`created_at`, `last_updated`, `expires_at`) に、JSON Schema で定義された `date-time` フォーマット (ISO 8601 形式) に従わない値が指定されています。
+    スキーマ ([`cairns-front-matter.schema.json`](../../schema/cairns-front-matter.schema.json)) ではこれらのフィールドに `format: date-time` が指定されています。
+
+  * **対処法:**
+
+    1.  エラーメッセージで指摘された日時フィールド (`last_updated` など) とその値 (`Value: "2025/04/30 10:00"` など) を確認します。
+    2.  値を **ISO 8601 形式** (`YYYY-MM-DDTHH:mm:ssZ` または `YYYY-MM-DDTHH:mm:ss+HH:mm` / `-HH:mm`) に修正します。
+    3.  例: `'2025/04/30 10:00'` -\> `'2025-04-30T10:00:00Z'` (UTCの場合) または `'2025-04-30T10:00:00+09:00'` (JSTの場合)。
+    4.  **推奨:** タイムゾーンオフセットを含めることで曖昧さをなくします。UTC (`Z`) またはローカルタイムゾーンのオフセット (例: `+09:00`) を明記してください。
+
+#### 2.4.2. カスタム検証ルール違反エラー (例)
+
+JSON Schema による基本的な構造チェックに加え、カスタム検証スクリプトは Cairns プロジェクト固有のルール (セクション 2.1.1 で解説) をチェックします (セクション 2.3.2.2 ステップ 4 参照)。
+これらのルールは、ドキュメント間の整合性やプロジェクトの規約 ([`document-map.md`](../document-map.md), [`naming-conventions.md`](../naming-conventions.md), [`folder-structure.md`](../folder-structure.md) 等) を維持するために重要です。ここでは、これらのカスタムルール違反でよく発生するエラーの例を示します。
+これらのエラーは VSCode 拡張機能では検出できません。
+
+**注記:** ここに示すエラーメッセージ例 (`Error [Custom Rule]: ...`) は、カスタム検証スクリプトがより詳細な情報を提供するために整形したものです。実際の出力はスクリプトの実装によって若干異なる場合があります。
+
+##### 2.4.2.1. ID 整合性違反
+
+  * **典型的なエラーメッセージ:**
+
+    ```
+    Error [Custom Rule]: ID inconsistency detected in 'docs/L2-principles/l2-sample_doc.md'.
+    Front matter 'id' ('l2-sample-doc') does not match the expected filename derived from the path ('l2-sample_doc').
+    Please ensure the filename (excluding '.md') matches the 'id' field and follows naming conventions. (Ref: naming-conventions.md)
+    ```
+
+    または (ドキュメントID重複)
+
+    ```
+    Error [Custom Rule]: Unique ID violation detected. Document ID 'l2-duplicate-id' found in 'docs/L2-principles/new-doc.md' is already used by 'docs/L2-principles/existing-doc.md'.
+    Document IDs must be unique across the entire repository.
+    ```
+
+    または (原則ID重複)
+
+    ```
+    Error [Custom Rule]: Duplicate principle ID 'duplicate-principle-id' found within 'docs/L2-principles/l2-some-principles.md'.
+    Principle IDs must be unique within the same document.
+    ```
+
+  * **原因:**
+    Cairns プロジェクトの重要なルールである ID に関する整合性違反です ([`devtools-list.md`](../devtools-list.md) A6.2, [`document-map.md`](../document-map.md) CI 検証項目参照)。
+
+      * **ID とファイル名の不一致:** Front Matter の `id` フィールドの値が、その Markdown ファイルのファイル名 (拡張子 `.md` を除く) と完全に一致していません。このルールは [`naming-conventions.md`](../naming-conventions.md) で定義されています。
+      * **ドキュメント ID の重複:** 定義されたドキュメント `id` が、リポジトリ内の他のドキュメントで既に使用されています。ドキュメント ID は Cairns 全体で一意である必要があります。
+      * **原則 ID の重複:** `core_principles` 配列内で、同じ `principle_id` が複数回定義されています。原則 ID は同一ドキュメント内で一意である必要があります。
+
+  * **対処法:**
+
+      * **ID とファイル名の不一致の場合:**
+        1.  エラーメッセージで指摘されたファイルの `id` フィールドとファイル名を確認します。
+        2.  [`naming-conventions.md`](../naming-conventions.md) を参照し、命名規則 (小文字、ハイフン区切り推奨) を確認します。
+        3.  `id` フィールドの値かファイル名のどちらか (または両方) を修正し、完全に一致させます。ファイル名を変更する場合は、Git の履歴追跡のため `git mv` コマンドの使用を推奨します ([`document-map.md`](../document-map.md) 運用ベストプラクティス参照)。
+      * **ドキュメント ID の重複の場合:**
+        1.  エラーメッセージで指摘された重複している ID とファイルパスを確認します。
+        2.  新しく作成または編集しているドキュメントの `id` を、リポジトリ内で一意となるように変更します。
+        3.  変更後の `id` がファイル名と一致していることも確認します。
+      * **原則 ID の重複の場合:**
+        1.  エラーメッセージで指摘されたドキュメントファイル内の `core_principles` 配列を確認します。
+        2.  重複している `principle_id` を特定し、ドキュメント内で一意になるように修正します。
+
+##### 2.4.2.2. スニペット参照整合性違反
+
+  * **典型的なエラーメッセージ:**
+
+    ```
+    Error [Custom Rule]: Broken snippet reference found in 'docs/L2-principles/l2-design-principles.md'.
+    Path './snippets/l2-design-principles/srp_good.code.ts' specified in 'core_principles[0].snippet_refs[0]' does not exist.
+    Please check the path and ensure the snippet file exists.
+    ```
+
+    または
+
+    ```
+    Error [Custom Rule]: Invalid snippet path format found in 'docs/L2-principles/l2-design-principles.md'.
+    Path '../snippets/srp_good.code.ts' specified in 'core_principles[0].snippet_refs[0]' does not follow the required convention: './snippets/<doc-id>/<principle-id>.code.md'.
+    (Ref: folder-structure.md#43-snippets, patterns.schema.json#pattern-snippetPath)
+    ```
+
+  * **原因:**
+    `core_principles[].snippet_refs` で指定されたコードスニペットファイルへの参照に問題があります ([`devtools-list.md`](../devtools-list.md) A6.1, [`document-map.md`](../document-map.md) CI 検証項目参照)。
+
+      * **ファイルが存在しない:** 指定されたパス (`./snippets/...` 形式) にファイルが存在しません。
+      * **パス形式が規約違反:** スニペットファイルのパスが、推奨される形式 (`./snippets/<doc-id>/<principle-id>.code.md`) に従っていません。このパス形式は [`folder-structure.md#43-snippets`](../folder-structure.md) で定義されており、参照元ドキュメントと原則を明確にするための規約です。スキーマ ([`patterns.schema.json#pattern-snippetPath`](../../schema/patterns.schema.json)) では、この形式 (拡張子が `.code.md`) が定義されています。カスタム検証スクリプトはこのスキーマ定義と規約に基づいてチェックを行います。**.code.md 以外の拡張子を使用したい場合は、規約やスキーマの改訂が必要になる可能性があります。**
+      * **補足:** 同様の参照整合性チェックは `media[].path` (画像等)、`relationships[].to`, `references[].doc_id`, `deprecation_info` (他ドキュメント/原則 ID)、`detail_ref`, `core_principles[].detail_ref` (Markdown 内アンカー) など、他の参照フィールドに対しても行われます ([`devtools-list.md`](../devtools-list.md) A6.1)。これらのエラーもファイル/ID/アンカーが存在しない、または形式が不正な場合に同様のパターンで発生します。**これらのフィールドに関する具体的なエラー例や詳細な検証ルールについては、[セクション 5「カスタム検証ルールの詳細」](#5-カスタム検証ルールの詳細) で網羅的に解説します。**
+
+  * **対処法:**
+
+    1.  エラーメッセージで指摘された参照元のドキュメントファイル (`l2-design-principles.md` など) と、参照先のパス (`./snippets/...` など) を確認します。
+    2.  **ファイルが存在しない場合:**
+          * `snippets/` ディレクトリ以下を確認し、ファイル名やパスが正しいか確認します。タイプミスがないか注意してください。
+          * もしファイルが存在しない場合は、正しいファイルを作成するか、Front Matter の参照を修正・削除します。
+    3.  **パス形式が規約違反の場合:**
+          * [`folder-structure.md#43-snippets`](../folder-structure.md) および [`patterns.schema.json#pattern-snippetPath`](../../schema/patterns.schema.json) を参照し、正しいパス構造 (`./snippets/<doc-id>/<principle-id>.code.md`) を確認します。
+          * 参照元ドキュメントの `id` と、関連する原則の `principle_id` を使用して、正しいパスを構築します。
+          * スニペットファイルを正しいパスに移動するか、Front Matter の参照パスを修正します。
+          * **重要:** パスは必ず `./` で始まる相対パスである必要があります。拡張子は現時点では `.code.md` に従ってください。
+    4.  他の参照フィールド (メディア、ドキュメントID、アンカー等) で同様のエラーが出た場合も、参照先が存在するか、ID やアンカー名が正しいかを確認・修正します。Markdown 本文内のアンカー (`<a id="..."></a>` または見出しの自動生成アンカー) が正しく設定されているかも確認してください。
+
+##### 2.4.2.3. Core Principle 構造違反 (L3+)
+
+  * **典型的なエラーメッセージ:**
+
+    ```
+    Error [Custom Rule]: Core principle structure violation in L3 document 'docs/L3-process/l3-dev-workflow.md'.
+    Expected 1 core principle representing the document, but found 2 principles defined.
+    For L3+ documents, typically only one principle summarizing the document is expected. (Ref: document-map.md)
+    ```
+
+    または
+
+    ```
+    Error [Custom Rule]: Core principle structure violation in L3 document 'docs/L3-process/l3-dev-workflow.md'.
+    The single core principle ID 'main-principle' does not follow the recommended naming convention '<doc-id>-main'. Expected ID 'l3-dev-workflow-main'. (Ref: document-map.md)
+    ```
+
+    または
+
+    ```
+    Error [Custom Rule]: Missing required field 'core_principles' in L2 document 'docs/L2-principles/l2-missing-principles.md'.
+    Core principles are required for documents in layers L0-L4. (Ref: document-map.md, cairns-front-matter.schema.json)
+    ```
+
+  * **原因:**
+    `core_principles` フィールドの記述方法が、ドキュメントのレイヤー (`layer`) に関するルール ([`document-map.md`](../document-map.md) で定義) やスキーマ ([`cairns-front-matter.schema.json`](../../schema/cairns-front-matter.schema.json)) に違反しています。カスタム検証スクリプト ([`devtools-list.md`](../devtools-list.md) A6) および CI (`document-map.md`) でチェックされます。
+
+      * **L3 以上のドキュメントでの原則数:** [`document-map.md`](../document-map.md) では、L3 以上のドキュメント (プロセス、ガイドライン等) では、原則としてドキュメント全体の主題を示す**単一の**原則 (`core_principles` 配列の要素数が 1) を定義することを推奨しています。上記例では、L3 ドキュメントに複数の原則が定義されている場合にエラーとなります。
+      * **L3 以上のドキュメントでの原則 ID 命名:** L3 以上で単一原則を定義する場合、その `principle_id` は `<doc-id>-main` という形式 (例: `l3-dev-workflow-main`) にすることを推奨しています ([`document-map.md`](../document-map.md))。これにより、その原則がドキュメント全体を表すものであることが明確になります。
+      * **必須フィールドの欠落:** L0-L4 レイヤーのドキュメントでは `core_principles` フィールド自体が必須です ([`cairns-front-matter.schema.json`](../../schema/cairns-front-matter.schema.json) の `if/then` 句参照)。これが未定義または空配列 (`[]`) の場合にエラーとなります。
+
+  * **対処法:**
+
+    1.  エラーメッセージで指摘されたドキュメントの `layer` と `core_principles` の内容を確認します。
+    2.  [`document-map.md`](../document-map.md) の `core_principles` に関する記述ルールと、[`cairns-front-matter.schema.json`](../../schema/cairns-front-matter.schema.json) の定義を参照します。
+    3.  **L3 以上のドキュメントで原則数が違反している場合:**
+          * ドキュメントの主題を表す単一の原則に集約することを検討します。
+          * 例外的に複数の原則が必要な場合は、その妥当性を再評価し、必要であれば設計者やレビュアーと相談します (`_dev_docs/front-matter-guidelines.md` セクション 3 フィールド解説 `core_principles` 参照)。
+    4.  **L3 以上のドキュメントで原則 ID が推奨命名に従っていない場合:**
+          * 単一原則の `principle_id` を推奨形式 `<doc-id>-main` に修正します。
+          * 対応する `detail_ref` のアンカー名も修正が必要になる場合があります (例: `#l3-dev-workflow-main-details`)。
+    5.  **L0-L4 ドキュメントで `core_principles` が未定義または空配列の場合:**
+          * ドキュメントの内容を表す適切な原則を最低一つ定義します。L2 文書であれば複数の原則を、L3/L4 であれば単一の原則 (`<doc-id>-main` 形式) を定義します。
+
+##### 2.4.2.4. 時間整合性違反 (`last_updated` vs `created_at`)
+
+  * **典型的なエラーメッセージ:**
+
+    ```
+    Error [Custom Rule]: Temporal inconsistency detected in 'docs/L1-foundation/l1-values.md'.
+    'last_updated' timestamp (2025-04-29T10:00:00Z) is earlier than 'created_at' timestamp (2025-04-30T12:00:00Z).
+    Please ensure created_at <= last_updated <= expires_at (if defined).
+    ```
+
+  * **原因:**
+    Front Matter 内の日時フィールド (`created_at`, `last_updated`, `expires_at`) の間に時間的な矛盾があります。
+    カスタム検証スクリプト ([`devtools-list.md`](../devtools-list.md) A6.3) および CI ([`document-map.md`](../document-map.md) CI 検証項目参照) は、以下の順序が保たれているかをチェックします (各フィールドが存在する場合):
+    `created_at <= last_updated <= expires_at`
+    上記例では、`last_updated` が `created_at` より過去の日時になっています。
+
+  * **対処法:**
+
+    1.  エラーメッセージで指摘されたドキュメントファイルと、関連する日時フィールド (`created_at`, `last_updated`, `expires_at`) の値を確認します。
+    2.  各タイムスタンプが正しいか、意図した順序 (`created_at <= last_updated <= expires_at`) になっているかを確認します。
+    3.  誤っているタイムスタンプを修正します。`last_updated` は通常、ドキュメントの作成日時 (`created_at`) 以降、有効期限 (`expires_at`) 以前である必要があります。
+    4.  日時フォーマット自体が誤っている可能性もあるため、セクション 2.4.1.3 も参照してください。
+
+---
+
+上記は代表的なエラーの例です。カスタム検証スクリプトはこれら以外にも、状態整合性 (`status` と `deprecation_info`, `checksum`, `signed_by` 等の関係) やガバナンス関連のチェック ([`devtools-list.md`](../devtools-list.md) A6, B3, B4)、その他の参照整合性チェック ([`document-map.md`](../document-map.md) CI項目参照) など、様々な検証を行う可能性があります。
+エラーメッセージをよく読み、関連するスキーマ定義 ([`schema/`](../../schema/)) やガイドライン ([`_dev_docs/front-matter-guidelines.md`](../front-matter-guidelines.md), [`_dev_docs/document-map.md`](../document-map.md), [`_dev_docs/naming-conventions.md`](../naming-conventions.md), [`_dev_docs/folder-structure.md`](../folder-structure.md)) を参照することで、ほとんどの問題は解決できるはずです。
+**ここで挙げた例以外のカスタム検証ルールや、より詳細なエラーケースについては、[セクション 5「カスタム検証ルールの詳細」](#5-カスタム検証ルールの詳細) を参照してください。** 状態整合性やガバナンス関連のエラー、その他の参照整合性エラーについても、セクション 5 で網羅的に解説します。
+不明な点や解決困難なエラーに遭遇した場合は、プロジェクトのメンテナーや他の開発者に相談してください。
+
+-----
+
