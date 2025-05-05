@@ -1,13 +1,13 @@
-## 「思想・哲学」ドキュメント群 (Cairns) 確立に向けたアクションプラン (改訂版 v1.0)
+# 「思想・哲学」ドキュメント群 (Cairns) 確立に向けたアクションプラン (改訂版 v1.0) {#h1-cairns-action-plan}
 
-**目的:**
+## **目的:** {#h2-purpose}
 
 * AIと人間の両方に親和性の高い「思想・哲学」ドキュメント群 (Project Philosophy Library: Cairns) を構築・維持する。
 * `Cairns Document map` に基づくドキュメント体系を確立し、知識へのアクセス性を向上させる。
 * スキーマ駆動開発とCI/CDによる品質保証プロセスを導入し、ドキュメントの一貫性と信頼性を維持する。
 * 開発AIエージェントおよび開発チームのアウトプット品質を安定的に向上させる知識基盤を構築する。
 
-**前提:**
+## **前提:** {#h2-prerequisites}
 
 * **情報アーキテクチャ:** `Cairns Document map v1.0 改訂案` に定義された6層構造、フォルダ構成、ドキュメント体系を採用する。
 * **ドキュメントフォーマット:** 「YAML Front-Matter (構造化) + Markdown本文 (非構造化)」の単一ファイル・二層構造を採用する。
@@ -16,9 +16,9 @@
 * **CI/CD:** CI/CDツール (例: GitHub Actions) を利用し、スキーマ検証、Lint、および `Cairns Document map` で定義された各種整合性チェックを段階的に自動化する。
 * **既存ドキュメント:** `Discussion log` に記載された「作成済みドキュメント」(`design-principles.md`, `coding-standards.md`, `testing-guidelines.md`, `persol-theme-guideline.md`, `frontend-design-vba.md`, `ai-developer-guide.md`) をCairnsフォーマットへの再構築対象とする。
 
-**フェーズとタスク:**
+## **フェーズとタスク:** {#h2-phases-and-tasks}
 
-**フェーズ1: 基盤構築と初期適用 (期間目安: 1.5～2ヶ月)**
+### フェーズ1: 基盤構築と初期適用 (期間目安: 1.5～2ヶ月) {#h3-phase-1-foundation-and-initial-application}
 このフェーズでは、Cairns作成・管理に必要な最低限の環境とルールを整備し、主要な基盤ドキュメントの初版を作成、既存ドキュメントの試験的再構築を通じて課題を特定します。
 
 | タスク ID | タスク内容                                                                 | 担当者 (例)                     | 成果物/完了条件                                                                                                                               |
@@ -31,7 +31,7 @@
 | 1.6       | **既存ドキュメントの試験的再構築 (1～2件)** | 担当ドキュメントオーナー, ドキュメント設計者 | 対象 (`design-principles.md` または `coding-standards.md` 等) をCairnsフォーマットに再構築したファイル。Front-Matter項目 (ID, Layer, サマリ3種, core\_principles等) がスキーマ準拠で記述されていること。再構築時の課題リスト。 |
 | 1.7       | **CIパイプライン調整 (IDチェック等)** | DevOps担当者                    | タスク1.4パイプラインに ID一意性チェック、ID-ファイル名整合性チェックを追加。                                                                    |
 
-**フェーズ2: Cairns拡充とプロセス整備 (期間目安: 3～4ヶ月)**
+### フェーズ2: Cairns拡充とプロセス整備 (期間目安: 3～4ヶ月) {#h3-phase-2-cairns-expansion-and-process-development}
 このフェーズでは、`Cairns Document map` に基づきドキュメントを拡充し、CI/CD機能を強化、運用プロセスを整備・文書化し、チームへの展開を開始します。
 
 | タスク ID | タスク内容                                                                                    | 担当者 (例)                               | 成果物/完了条件                                                                                                                                                                 |
@@ -45,7 +45,7 @@
 | 2.7       | **チームへの展開とトレーニング** | ドキュメント設計担当者, 開発リード        | Cairns利用・貢献方法に関する説明会実施記録、`l0-contribution-guide.md` 周知、Q&A対応。                                                                                            |
 | 2.8       | **JSON Schema 改訂 (必要に応じて)** | ドキュメント設計担当者                    | フェーズ1, 2 を通じて必要と判断されたスキーマ改訂 (例: `layer_defaults` 追加) を実施し、バージョン更新 (v2.1等)。                                                              |
 
-**フェーズ3: 運用定着と継続的改善 (期間目安: 継続)**
+### フェーズ3: 運用定着と継続的改善 (期間目安: 継続) {#h3-phase-3-operational-establishment-and-continuous-improvement}
 このフェーズでは、Cairnsを日常的な開発プロセスに組み込み、レビュー・更新プロセスを定着させ、フィードバックに基づき継続的に改善します。AI連携を深化させ、効果を測定します。
 
 | タスク ID | タスク内容                                                                          | 担当者 (例)                               | 成果物/完了条件                                                                                                                                                      |
@@ -58,7 +58,7 @@
 | 3.6       | **AIエージェント連携の実践と評価** | AI活用推進担当, 開発チーム                | AIエージェントによるCairns参照 (RAG Index活用) の実践、プロンプト例 (`llm_usage_hints` 活用) の共有、アウトプット品質評価レポート、Cairns内容やAI連携方法の改善。                         |
 | 3.7       | **Cairnsロードマップの更新と実行** | ドキュメント設計担当者, 開発リード        | `l0-roadmap.md` に基づくCairns自体の改善・拡張計画の定期的な見直しと実行。                                                                                                |
 
-**ドキュメンテーションフロー (改訂版概要):**
+## **ドキュメンテーションフロー (改訂版概要):** {#h2-documentation-flow-revised-summary}
 
 1.  **作成/更新:**
     * 担当者が `template.md` や既存ドキュメントを元にローカルで Markdown ファイル (YAML Front-Matter + 本文) を作成・編集。`l0-contribution-guide.md` 参照。
@@ -84,7 +84,7 @@
         * 更新されたRAG Index を参照し、関連情報を取得。
         * Git リポジトリから直接 YAML/Markdown を読み込み、Front-Matter の構造化情報 (サマリ3種、`core_principles` 等) や `llm_usage_hints` を活用。
 
-**継続的な運用:**
+## **継続的な運用:** {#h2-continuous-operation}
 
 * **オーナーシップ:** 各ドキュメントに明確なオーナーを割り当てる (`l0-governance.md`)。
 * **レビュー文化:** ドキュメントレビューを重要プロセスとして定着させる。

@@ -1,10 +1,10 @@
-# Front Matter 記述ガイドライン
+# Front Matter 記述ガイドライン {h1-front-matter-guidelines}
 
-## 1. はじめに
+## 1. はじめに {#h2-introduction}
 
-### 1.1. このガイドラインの目的と対象読者
+### 1.1. このガイドラインの目的と対象読者 {#h3-purpose-and-audience}
 
-#### 目的
+#### 目的 {h4-purpose}
 
 このガイドラインは、Cairns プロジェクトにおける Markdown ドキュメントの品質、一貫性、および自動処理（検証、インデックス作成、ガバナンス等）を担保するために、ドキュメントのメタデータである **Front Matter** の記述方法を標準化することを目的とします。
 
@@ -14,7 +14,7 @@
 * プロジェクト全体の目標である AI (RAG) 活用促進や開発者体験 (DX) 向上との整合性を確保し、将来のプロジェクト進化（LLM連携深化、ガバナンス強化）に対応できる記述基盤を確立します。
 * [`template.md`](templates/template.md) や VSCode 拡張機能だけではカバーしきれない詳細なルール、ベストプラクティス、各フィールドの意図、そして **ローカルでのカスタム検証の重要性** について解説します。
 
-#### 対象読者
+#### 対象読者 {h4-audience}
 
 このガイドラインは、以下の方々を対象としています。
 
@@ -22,7 +22,7 @@
 * プロジェクトの技術ツール（CI/CD、検証スクリプト、RAG Indexer、静的サイトジェネレーター等）の開発・保守担当者。
 * プロジェクトのアーキテクチャ、情報管理、ガバナンスに関心を持つステークホルダー。
 
-### 1.2. Front Matter の重要性 (一貫性、自動化、AI活用、ガバナンス)
+### 1.2. Front Matter の重要性 (一貫性、自動化、AI活用、ガバナンス) {#h3-importance-of-front-matter}
 
 Cairns プロジェクトにおいて、ドキュメントの Front Matter は単なるメタデータではなく、プロジェクト全体の品質と効率性を支える基盤です。その重要性は、以下の4つの観点から理解できます。
 
@@ -43,58 +43,58 @@ Cairns プロジェクトにおいて、ドキュメントの Front Matter は�
     * `status`, `version`, `authors`, `owner`, `last_updated`, `created_at`, `review_cycle_days`, `expires_at`, `license`, `checksum`, `signed_by` などのフィールドを通じて、ドキュメントの鮮度、信頼性、責任体制、承認状態を管理・追跡可能にし、**ドキュメントのトレーサビリティと信頼性を確保します。**
     * プロジェクト全体のガバナンスプロセス (例: 承認フロー、定期レビュー) の運用を支え、**コンプライアンス遵守や品質基準の維持に貢献します。** (`l0-governance.md` (作成中) 参照)
 
-### 1.3. 関連ドキュメントへのリンク
+### 1.3. 関連ドキュメントへのリンク {#h3-related-documents}
 
 本ガイドラインを理解し、効果的に活用するために、以下の関連ドキュメントを参照することを強く推奨します。
 
 * **JSON Schema:**
-    * [`schema/cairns-front-matter.schema.json`](../../schema/cairns-front-matter.schema.json): Front Matter の正確な構造、型、必須項目、許容値などを定義する公式な定義。本ガイドラインの記述の根拠となります。
-    * [`schema/patterns.schema.json`](../../schema/patterns.schema.json): ID やパスなどに使われる正規表現パターンを定義。特定のフィールドのフォーマットを確認する際に参照。
-    * (その他: [`schema/common-defs.schema.json`](../../schema/common-defs.schema.json), [`schema/content-defs.schema.json`](../../schema/content-defs.schema.json), [`schema/metadata-defs.schema.json`](../../schema/metadata-defs.schema.json)): より詳細な共通定義や特定フィールド群の定義。
+    * [`schema/cairns-front-matter.schema.json`](../schema/cairns-front-matter.schema.json): Front Matter の正確な構造、型、必須項目、許容値などを定義する公式な定義。本ガイドラインの記述の根拠となります。
+    * [`schema/patterns.schema.json`](../schema/patterns.schema.json): ID やパスなどに使われる正規表現パターンを定義。特定のフィールドのフォーマットを確認する際に参照。
+    * (その他: [`schema/common-defs.schema.json`](../schema/common-defs.schema.json), [`schema/content-defs.schema.json`](../schema/content-defs.schema.json), [`schema/metadata-defs.schema.json`](../schema/metadata-defs.schema.json)): より詳細な共通定義や特定フィールド群の定義。
 
 * **情報アーキテクチャと規約:**
-    * [`_dev_docs/l0-cairns-overview.md`](../l0-cairns-overview.md): Cairns プロジェクト全体の目的、構造、基本方針を解説。本ガイドラインを読む上での前提知識として役立ちます。 *(追加)*
-    * [`_dev_docs/document-map.md`](../document-map.md): Cairns プロジェクト全体のドキュメント体系 (L0-L5 レイヤー構造)、各ドキュメントの目的、CI で検証される項目などを定義。`layer` や `core_principles` の記述ルールなどを理解するために参照。
-    * [`_dev_docs/naming-conventions.md`](../naming-conventions.md): フォルダ名、ファイル名、ドキュメント ID (`id`)、原則 ID (`principle_id`) などの命名規則を定義。特に **`id` とファイル名の一致ルール** は厳守事項です。
-    * [`_dev_docs/folder-structure.md`](../folder-structure.md): リポジトリ全体のフォルダ構成を定義。特に `snippets/`, `media/` 配下へのリソース配置とパス構造のルールを参照。
+    * [`_dev_docs/l0-cairns-overview.md`](../docs/L0-library-overview/l0-cairns-overview.md): Cairns プロジェクト全体の目的、構造、基本方針を解説。本ガイドラインを読む上での前提知識として役立ちます。 *(追加)*
+    * [`_dev_docs/document-map.md`](document-map.md): Cairns プロジェクト全体のドキュメント体系 (L0-L5 レイヤー構造)、各ドキュメントの目的、CI で検証される項目などを定義。`layer` や `core_principles` の記述ルールなどを理解するために参照。
+    * [`_dev_docs/naming-conventions.md`](naming-conventions.md): フォルダ名、ファイル名、ドキュメント ID (`id`)、原則 ID (`principle_id`) などの命名規則を定義。特に **`id` とファイル名の一致ルール** は厳守事項です。
+    * [`_dev_docs/folder-structure.md`](folder-structure.md): リポジトリ全体のフォルダ構成を定義。特に `snippets/`, `media/` 配下へのリソース配置とパス構造のルールを参照。
 
 * **テンプレートとツール:**
-    * [`_dev_docs/templates/template.md`](../templates/template.md): 新規ドキュメント作成時に使用する基本テンプレート。主要なフィールドと簡単な説明が含まれます。
-    * [`_dev_docs/devtools-list.md`](../devtools-list.md): プロジェクトで使用される Linter、Validator、CI ツールなどのリスト。特に、**ローカルでのカスタム検証スクリプトの必要性** とその背景 (VSCode 拡張機能の限界等) を理解するために参照。
+    * [`_dev_docs/templates/template.md`](templates/template.md): 新規ドキュメント作成時に使用する基本テンプレート。主要なフィールドと簡単な説明が含まれます。
+    * [`_dev_docs/devtools-list.md`](devtools-list.md): プロジェクトで使用される Linter、Validator、CI ツールなどのリスト。特に、**ローカルでのカスタム検証スクリプトの必要性** とその背景 (VSCode 拡張機能の限界等) を理解するために参照。
 
 * **プロジェクト管理と運用:**
     * `_dev_docs/l0-glossary.md` (**作成中：完成次第参照必須**): プロジェクト内で使用される共通の専門用語や略語の定義。
     * `_dev_docs/l0-contribution-guide.md` (**作成中：完成次第参照必須**): ドキュメントの作成・更新プロセス、レビュー手順など、貢献方法の詳細。
     * `_dev_docs/l0-governance.md` (**作成中：完成次第参照必須**): ドキュメントのライフサイクル管理、承認プロセス、`status` 変更に伴う要件 (`checksum`, `signed_by` 等) の詳細。
-    * [`_dev_docs/action-plan.md`](../action-plan.md): プロジェクト全体の開発計画。AI連携 (RAG) やガバナンス強化など、将来的な方向性を理解する上で参考になります。
+    * [`_dev_docs/action-plan.md`](action-plan.md): プロジェクト全体の開発計画。AI連携 (RAG) やガバナンス強化など、将来的な方向性を理解する上で参考になります。
 
 -----
 
-## 2. 【最重要】ローカル検証ガイド (DX向上)
+## 2. 【最重要】ローカル検証ガイド (DX向上) {#h2-local-validation-guide}
 
-### 2.1. なぜローカル検証が必要か
+### 2.1. なぜローカル検証が必要か {#h3-why-local-validation-is-needed}
 
 このセクションでは、Cairns プロジェクトにおいて、なぜ CI/CD パイプラインだけに頼るのではなく、開発者自身のローカル環境で Front Matter の検証を行うことが**非常に重要**なのか、その理由を明確に解説します。
 
 ローカル検証は、単なる推奨プラクティスではなく、プロジェクトの品質維持と開発効率向上のために**必須**のプロセスと位置づけられています。その必要性を理解することで、後続セクションで解説する具体的なセットアップや実行手順の意義がより明確になるでしょう。
 
-#### 2.1.1. スキーマだけでは不十分な理由 (Cairns 固有ルール)
+#### 2.1.1. スキーマだけでは不十分な理由 (Cairns 固有ルール) {#h4-why-schema-is-not-enough}
 
-Cairns プロジェクトでは、Front Matter の記述ルールを定義するために JSON Schema ([`schema/cairns-front-matter.schema.json`](../../schema/cairns-front-matter.schema.json) 参照) を活用しています。JSON Schema は、フィールドの有無、データ型、必須/任意、許容される値 (enum)、文字列パターンなどを定義するための強力なツールであり、Draft 2020-12 の高度な機能（条件付き必須項目、レイヤーに応じた必須項目など）も利用しています。
+Cairns プロジェクトでは、Front Matter の記述ルールを定義するために JSON Schema ([`schema/cairns-front-matter.schema.json`](../schema/cairns-front-matter.schema.json) 参照) を活用しています。JSON Schema は、フィールドの有無、データ型、必須/任意、許容される値 (enum)、文字列パターンなどを定義するための強力なツールであり、Draft 2020-12 の高度な機能（条件付き必須項目、レイヤーに応じた必須項目など）も利用しています。
 
 しかし、JSON Schema による検証だけでは、Cairns プロジェクトが要求する全ての品質基準を満たすことはできません。なぜなら、スキーマ定義は主に**構造的な妥当性**を保証するものであり、プロジェクト固有の**意味論的な整合性**や、ファイルシステムなどの**外部リソースとの依存関係**までは検証できないためです (この点はスキーマファイル自身のコメントにも記載されています)。
 
-具体的には、以下のような **Cairns 固有のルール** は、JSON Schema の範囲を超えており、カスタム検証スクリプト ([`devtools-list.md`](../devtools-list.md) の A6 参照) によるチェックが必要です。これらのルールは、[`document-map.md`](../document-map.md) で定義されている CI 検証項目の一部にも対応しています。これらのルールに違反すると、リンク切れや情報の不整合、CI エラーなど、様々な問題を引き起こす可能性があります。
+具体的には、以下のような **Cairns 固有のルール** は、JSON Schema の範囲を超えており、カスタム検証スクリプト ([`devtools-list.md`](devtools-list.md) の A6 参照) によるチェックが必要です。これらのルールは、[`document-map.md`](document-map.md) で定義されている CI 検証項目の一部にも対応しています。これらのルールに違反すると、リンク切れや情報の不整合、CI エラーなど、様々な問題を引き起こす可能性があります。
 
   * **ID とファイル名の一致:**
 
-      * Front Matter の `id` フィールドの値は、その Markdown ファイルの名前 (拡張子を除く) と完全に一致する必要があります ([`naming-conventions.md`](../naming-conventions.md) 参照)。
+      * Front Matter の `id` フィールドの値は、その Markdown ファイルの名前 (拡張子を除く) と完全に一致する必要があります ([`naming-conventions.md`](naming-conventions.md) 参照)。
       * スキーマは `id` の**形式** (例: `^[a-z0-9\\-]+$`) を検証できますが、ファイルシステム上の**ファイル名との照合**はできません。
       * *(違反時の影響例: ツールによるドキュメント間の自動リンク生成や参照解決が失敗したり、開発者が手動で関連ファイルを探す際に混乱が生じます。)*
 
   * **参照整合性 (リンク切れチェック):**
 
-      * `snippet_refs` ([`schema/patterns.schema.json#pattern-snippetPath`](../../schema/patterns.schema.json) 参照) で指定されたスニペットファイルが、**推奨されるパス形式 (`./snippets/<doc-id>/<principle-id>.code.md`) に従っており、かつ実際に存在するか**。
+      * `snippet_refs` ([`schema/patterns.schema.json#pattern-snippetPath`](../schema/patterns.schema.json) 参照) で指定されたスニペットファイルが、**推奨されるパス形式 (`./snippets/<doc-id>/<principle-id>.code.md`) に従っており、かつ実際に存在するか**。
       * `media[].path` で指定された画像などのメディアファイルが実際に存在するか。
       * `relationships[].to`, `references[].doc_id`, `deprecation_info` などで参照される他の Cairns ドキュメント ID や原則 ID (`docId#principleId` 形式) がリポジトリ内に実際に存在するか。
       * `detail_ref` や `core_principles[].detail_ref` などで指定された Markdown 本文中のアンカー (`#anchor-name`) が実際に存在するか。
@@ -109,8 +109,8 @@ Cairns プロジェクトでは、Front Matter の記述ルールを定義する
 
   * **構造整合性 (例: `core_principles`):**
 
-      * [`document-map.md`](../document-map.md) で定義されているように、ドキュメントの `layer` に応じて `core_principles` の記述方法に関するルールがあります (例: `L2` では複数の原則定義が可能だが、`L3` 以上では原則としてドキュメント全体を表す単一の `<doc-id>-main` という ID の原則を定義するなど)。
-      * スキーマの `if/then` を使ってレイヤーに応じた `core_principles` フィールド自体の必須化は行っていますが、その**内容** (配列の要素数や特定の ID 命名規則など) に関する詳細なルールは表現しきれません。(これらのカスタムルールの詳細は、本ガイドラインの\*\*セクション 5「カスタム検証ルールの詳細」\*\*で解説します)。
+      * [`document-map.md`](document-map.md) で定義されているように、ドキュメントの `layer` に応じて `core_principles` の記述方法に関するルールがあります (例: `L2` では複数の原則定義が可能だが、`L3` 以上では原則としてドキュメント全体を表す単一の `<doc-id>-main` という ID の原則を定義するなど)。
+      * スキーマの `if/then` を使ってレイヤーに応じた `core_principles` フィールド自体の必須化は行っていますが、その**内容** (配列の要素数や特定の ID 命名規則など) に関する詳細なルールは表現しきれません。(これらのカスタムルールの詳細は、本ガイドラインの**セクション 5「カスタム検証ルールの詳細」**で解説します)。
       * *(違反時の影響例: ドキュメントの意図した構造が崩れ、ツールによる原則リストの自動生成や、特定のレイヤーのドキュメントに対する構造的な分析が正しく機能しなくなります。)*
 
   * **(補足) ID の一意性:**
@@ -120,9 +120,9 @@ Cairns プロジェクトでは、Front Matter の記述ルールを定義する
 
 **結論として、** これらの Cairns プロジェクト固有の品質基準を満たし、ドキュメント間の整合性を保つためには、JSON Schema 検証に加えて、これらのカスタムルールを網羅的にチェックする**専用の検証スクリプトが不可欠**です。
 
-#### 2.1.2. CI 前の早期フィードバック
+#### 2.1.2. CI 前の早期フィードバック {#h4-early-feedback-before-ci}
 
-Cairns プロジェクトでは、品質保証のため、CI/CD パイプライン (例: GitHub Actions, [`devtools-list.md`](../devtools-list.md) A5 参照) において、Pull Request 作成時や main ブランチへのマージ前に、自動的に各種 Lint (YAML, Markdown) や検証 (スキーマ, カスタムルール) を実行する仕組みを導入しています。これは、リポジトリ全体の品質を維持するための**最後の砦**として機能します。
+Cairns プロジェクトでは、品質保証のため、CI/CD パイプライン (例: GitHub Actions, [`devtools-list.md`](devtools-list.md) A5 参照) において、Pull Request 作成時や main ブランチへのマージ前に、自動的に各種 Lint (YAML, Markdown) や検証 (スキーマ, カスタムルール) を実行する仕組みを導入しています。これは、リポジトリ全体の品質を維持するための**最後の砦**として機能します。
 
 しかし、もしローカル環境で事前に検証を行わず、CI パイプラインで初めてエラーが発見された場合、以下のような非効率が発生します。
 
@@ -140,16 +140,16 @@ Cairns プロジェクトでは、品質保証のため、CI/CD パイプライ�
 
 **結論として、** ローカル検証は、単に CI の失敗を防ぐだけでなく、開発プロセス全体の効率とスピードを向上させるための**積極的な品質活動**です。CI の結果を待つのではなく、開発者自身が手元で問題を早期に発見し、解決することが強く推奨されます。
 
-#### 2.1.3. DX ギャップの補完
+#### 2.1.3. DX ギャップの補完 {#h4-complementing-dx-gap}
 
 現代の開発では、VSCode のような高機能なテキストエディタやその拡張機能が、開発者体験 (DX: Developer Experience) の向上に大きく貢献しています。リアルタイムでのエラー検出やコード補完、スタイルチェックなどは、開発の効率と快適性を高める上で非常に有用です。
 
-Cairns プロジェクトでも、以下の VSCode 拡張機能の利用を推奨しており、これらは DX 向上に役立ちます ([`devtools-list.md`](../devtools-list.md) A7 参照)。
+Cairns プロジェクトでも、以下の VSCode 拡張機能の利用を推奨しており、これらは DX 向上に役立ちます ([`devtools-list.md`](devtools-list.md) A7 参照)。
 
   * **`redhat.vscode-yaml`:** YAML の構文エラーや、JSON Schema に基づく**基本的な** Front Matter の検証 (フィールドの型、必須項目、enum 値など) をリアルタイムで検知してくれます。
   * **`DavidAnson.vscode-markdownlint`:** Markdown 本文のスタイルや構文に関するルール違反をリアルタイムで検知し、Quick Fix 機能も提供してくれるため、非常に便利です。
 
-しかし、これらの便利な拡張機能をもってしても、Cairns プロジェクトの検証要件を**完全に**カバーすることはできません。ここには、**「DX ギャップ」** と呼ぶべき限界が存在します ([`devtools-list.md`](../devtools-list.md) A3, A7 の DX 課題・最重要課題も参照)。
+しかし、これらの便利な拡張機能をもってしても、Cairns プロジェクトの検証要件を**完全に**カバーすることはできません。ここには、**「DX ギャップ」** と呼ぶべき限界が存在します ([`devtools-list.md`](devtools-list.md) A3, A7 の DX 課題・最重要課題も参照)。
 
   * **JSON Schema の高度な機能サポートの限界:**
 
@@ -174,7 +174,7 @@ Cairns プロジェクトでも、以下の VSCode 拡張機能の利用を推�
 
 -----
 
-### 2.2. 検証環境のセットアップ
+### 2.2. 検証環境のセットアップ {#h3-validation-environment-setup}
 
 このセクションでは、Cairns ドキュメントの Front Matter と本文の品質を、開発者自身のローカル環境で完全に検証するために必要な環境構築の手順を解説します。
 
@@ -182,7 +182,7 @@ Cairns プロジェクトでも、以下の VSCode 拡張機能の利用を推�
 
 ここで説明するセットアップを行うことで、CI 環境と同等の検証レベルをローカルで実現し、次セクション 2.3 で示す検証コマンドを実行できるようになります。
 
-#### 2.2.1. 前提となるツール
+#### 2.2.1. 前提となるツール {#h4-prerequisite-tools}
 
 ローカル検証スクリプトを実行するために、事前に以下のツールがご自身の開発環境にインストールされている必要があります。
 
@@ -206,9 +206,9 @@ Cairns プロジェクトでも、以下の VSCode 拡張機能の利用を推�
       * **インストールガイド:** [Git 公式サイト](https://git-scm.com/) を参照してください。
 
 > **注意:**
-> カスタム検証スクリプトの言語選択 (Node.js or Python) は [`devtools-list.md`](../devtools-list.md) (A3, A6) に基づきます。ここでは、**Node.js が選択されたことを前提**として説明しています。もし Python が選択された場合は、Python 実行環境 (`python`) とパッケージマネージャ (`pip`) が前提ツールとなり、依存関係のインストールには `pip install -r requirements.txt` 等のコマンドが必要になります。
+> カスタム検証スクリプトの言語選択 (Node.js or Python) は [`devtools-list.md`](devtools-list.md) (A3, A6) に基づきます。ここでは、**Node.js が選択されたことを前提**として説明しています。もし Python が選択された場合は、Python 実行環境 (`python`) とパッケージマネージャ (`pip`) が前提ツールとなり、依存関係のインストールには `pip install -r requirements.txt` 等のコマンドが必要になります。
 
-#### 2.2.2. セットアップ手順とコマンド例
+#### 2.2.2. セットアップ手順とコマンド例 {#h4-setup-procedure-and-commands}
 
 検証に必要な依存ライブラリをインストールします。
 
@@ -223,31 +223,31 @@ Cairns プロジェクトでも、以下の VSCode 拡張機能の利用を推�
     npm install
     ```
 
-      * **補足:** このコマンドにより、開発に必要な全ての依存関係 (`dependencies` および `devDependencies`) が `node_modules` ディレクトリにインストールされます。これには、Front Matter の検証に必要なライブラリ (例: `ajv`, `gray-matter` など、通常 `devDependencies` に含まれます) も含まれます。具体的なライブラリやバージョンについては、[`devtools-list.md`](../devtools-list.md) の A3, A6 やプロジェクトの `package.json` を参照してください。カスタム検証スクリプトもこれらのライブラリを利用します。
+      * **補足:** このコマンドにより、開発に必要な全ての依存関係 (`dependencies` および `devDependencies`) が `node_modules` ディレクトリにインストールされます。これには、Front Matter の検証に必要なライブラリ (例: `ajv`, `gray-matter` など、通常 `devDependencies` に含まれます) も含まれます。具体的なライブラリやバージョンについては、[`devtools-list.md`](devtools-list.md) の A3, A6 やプロジェクトの `package.json` を参照してください。カスタム検証スクリプトもこれらのライブラリを利用します。
       * **注意:** プロジェクトによっては、セットアップ手順を簡略化するために `Makefile` などでラップされたコマンド (例: `make setup` や `make install-dev`) が用意されている場合があります。その場合は、**`README.md` に記載されているセットアップ手順を優先**してください。
 
     このステップが完了すると、ローカル環境で検証スクリプトを実行する準備が整います。次セクション 2.3 では、実際に検証を実行する方法について解説します。
 
 -----
 
-## 2.3. 検証の実行方法
+### 2.3. 検証の実行方法 {#h3-how-to-run-validation}
 
 セクション 2.1 で述べた通り、Cairns 固有のルール検証や CI 前の早期フィードバック、そして VSCode 拡張機能だけでは埋められない DX ギャップの補完のため、ローカル環境での検証が不可欠です。
 ここでは、その具体的な実行方法を解説します。VSCode 拡張機能による基本的なスキーマ検証と、プロジェクトの全ルールを網羅するカスタム検証スクリプトによる完全検証の2つの方法を説明します。
 CI/CD パイプラインでのエラーを未然に防ぎ、開発効率を高めるために、特に後者のカスタム検証スクリプトの実行を強く推奨します。
 
-### 2.3.1. 基本的なスキーマ検証 (VSCode 拡張機能)
+#### 2.3.1. 基本的なスキーマ検証 (VSCode 拡張機能) {#h4-basic-schema-validation-vscode}
 
-VSCode 拡張機能 (［`redhat.vscode-yaml`］([https://marketplace.visualstudio.com/items?itemName=redhat.vscode-yaml](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-yaml)) など) を利用した、リアルタイムに近い基本的なスキーマ検証の方法とその限界について説明します。
+VSCode 拡張機能 ([`redhat.vscode-yaml`](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-yaml) など) を利用した、リアルタイムに近い基本的なスキーマ検証の方法とその限界について説明します。
 手軽に始められる一方、Cairns プロジェクトの全てのルールをカバーできない点に注意が必要です。
 
-#### 2.3.1.1. 簡単な使い方
+##### 2.3.1.1. 簡単な使い方 {h5-simple-usage}
 
 1.  **VSCode でファイルを開く:** YAML Front Matter を含む `.md` ファイルを VSCode で開きます。
 2.  **拡張機能の確認:**
-    * ［`redhat.vscode-yaml`］([https://marketplace.visualstudio.com/items?itemName=redhat.vscode-yaml](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-yaml)) 拡張機能がインストールされ、有効になっていることを確認してください。
+    * [`redhat.vscode-yaml`](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-yaml) 拡張機能がインストールされ、有効になっていることを確認してください。
 3.  **スキーマの関連付け設定:**
-    * プロジェクトのスキーマ定義ファイル (［`schema/cairns-front-matter.schema.json`］(../../schema/cairns-front-matter.schema.json)) が、VSCode の設定 (`.vscode/settings.json` またはユーザー設定) で Markdown ファイル内の YAML に関連付けられている必要があります。以下は、プロジェクトルートに `.vscode/settings.json` を作成または編集する場合の設定例です。*(リポジトリに設定例がある場合は、［`../../.vscode/settings.json.example`］(../../.vscode/settings.json.example) などを参照してください)*
+    * プロジェクトのスキーマ定義ファイル ([`schema/cairns-front-matter.schema.json`](../schema/cairns-front-matter.schema.json)) が、VSCode の設定 (`.vscode/settings.json` またはユーザー設定) で Markdown ファイル内の YAML に関連付けられている必要があります。以下は、プロジェクトルートに `.vscode/settings.json` を作成または編集する場合の設定例です。*(リポジトリに設定例がある場合は、[`.vscode/settings.json.example`](../.vscode/settings.json.example) などを参照してください)*
 
         ```json
         // .vscode/settings.json の例
@@ -266,40 +266,40 @@ VSCode 拡張機能 (［`redhat.vscode-yaml`］([https://marketplace.visualstudi
     * 上記設定が正しければ、エディタがリアルタイムで基本的なスキーマ違反 (例: フィールドのデータ型間違い、必須フィールドの欠落、`enum` で定義されていない値の使用など) を検出し、問題箇所に波線などで表示します。
     * 問題箇所にマウスカーソルを合わせると、エラーの詳細メッセージが表示され、修正のヒントを得られます。
 
-#### 2.3.1.2. 限界 (カスタムルール非対応等)
+##### 2.3.1.2. 限界 (カスタムルール非対応等) {h5-limitations-no-custom-rules}
 
 * **最重要:** この VSCode 拡張機能による検証は、あくまで**基本的なスキーマ構造のチェック**に限定されます。以下の Cairns プロジェクト固有のルールや整合性チェックは**行われません**。これらは後述する**カスタム検証スクリプトでのみ検証可能**です。
 
 * **カスタムルールの非対応:**
-    * **ID とファイル名の一致:** Front Matter `id` とファイル名が一致するか (［`naming-conventions.md`］(../naming-conventions.md) 参照)。
+    * **ID とファイル名の一致:** Front Matter `id` とファイル名が一致するか ([`naming-conventions.md`](naming-conventions.md) 参照)。
     * **参照整合性 (リンク切れチェック):**
-        * `snippet_refs` で指定されたスニペットファイルが存在し、**パス形式が規約 (［`folder-structure.md`］(../folder-structure.md) 4.3 参照) に従っているか**。
+        * `snippet_refs` で指定されたスニペットファイルが存在し、**パス形式が規約 ([`folder-structure.md`](folder-structure.md) 4.3 参照) に従っているか**。
         * `media[].path` で指定されたメディアファイルが存在するか。
         * `relationships[].to`, `references[].doc_id`, `deprecation_info` などで参照されるドキュメントIDや原則ID (`docId#principleId`) がリポジトリ内に存在するか。
         * `detail_ref` や `core_principles[].detail_ref` などで指定された Markdown 本文中のアンカー (`#anchor-name`) が存在するか。
     * **時間整合性:** `created_at` <= `last_updated` <= `expires_at` が満たされているか。
-    * **構造整合性:** `layer` に応じた `core_principles` の記述ルール（例: L3+での単一原則ルール）が守られているか (［`document-map.md`］(../document-map.md) 参照)。
+    * **構造整合性:** `layer` に応じた `core_principles` の記述ルール（例: L3+での単一原則ルール）が守られているか ([`document-map.md`](document-map.md) 参照)。
     * **ID の一意性:** ドキュメント `id` やドキュメント内の `principle_id` がユニークか。
-    * *(これらのカスタムルールの詳細については、［セクション 5「カスタム検証ルールの詳細」］(#TODO-link-to-section-5) を参照してください。)*
+    * *(これらのカスタムルールの詳細については、[セクション 5「カスタム検証ルールの詳細」](#h2-custom-validation-rule-details) を参照してください。)*
 
 * **JSON Schema Draft 2020-12 高度機能のサポート限界:**
-    * 本プロジェクトのスキーマ (［`schema/cairns-front-matter.schema.json`］(../../schema/cairns-front-matter.schema.json)) では、`$dynamicRef` などの Draft 2020-12 の高度な機能を利用しています。
-    * ［`redhat.vscode-yaml`］([https://marketplace.visualstudio.com/items?itemName=redhat.vscode-yaml](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-yaml)) 拡張機能は、これらの機能を**完全にはサポートしていない可能性**があります (［`devtools-list.md`］(../devtools-list.md) A3 DX課題参照)。
+    * 本プロジェクトのスキーマ ([`schema/cairns-front-matter.schema.json`](../schema/cairns-front-matter.schema.json)) では、`$dynamicRef` などの Draft 2020-12 の高度な機能を利用しています。
+    * [`redhat.vscode-yaml`](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-yaml) 拡張機能は、これらの機能を**完全にはサポートしていない可能性**があります ([`devtools-list.md`](devtools-list.md) A3 DX課題参照)。
     * その結果、**エディタ上ではエラーが表示されなくても、実際にはスキーマ違反である可能性**があります。
 
 * **結論:** VSCode 拡張機能はコーディング中の補助として非常に有用ですが、Cairns の品質基準を完全に満たすためには、コミット前などに**必ずカスタム検証スクリプトによる検証を実行**してください。
 
-### 2.3.2. 推奨: カスタム検証スクリプトによる完全検証
+#### 2.3.2. 推奨: カスタム検証スクリプトによる完全検証 {#h4-recommended-full-validation-script}
 
 Cairns プロジェクトの **全ての** 検証ルール (JSON Schema の厳密なチェック + 独自のカスタムルール) を網羅的にチェックするための、**強く推奨される** 検証方法です。
 セクション 2.1.3 で述べた VSCode 拡張機能の限界 (DX ギャップ) を完全に補完し、CI/CD パイプラインで実行される内容と同じレベルの検証をローカルで実行できます。これにより、プロジェクトの品質を確実に担保します。
 この検証は、セクション 2.2 でセットアップした環境で実行します。
 
-#### 2.3.2.1. 実行コマンド例
+##### 2.3.2.1. 実行コマンド例 {h5-execution-command-examples}
 
 * **実行場所:** プロジェクトのルートディレクトリで以下のコマンドを実行します。
-* **コマンド:** 以下のコマンドは通常、［`package.json`］(../../package.json) の `scripts` セクションで定義されています。
-    *(**重要:** 実際のスクリプト名 (`validate`, `validate:all` 等) はプロジェクトによって異なる場合があります。必ず ［`package.json`］(../../package.json) の `scripts` セクションを確認してください。)*
+* **コマンド:** 以下のコマンドは通常、[`package.json`](../package.json) の `scripts` セクションで定義されています。
+    *(**重要:** 実際のスクリプト名 (`validate`, `validate:all` 等) はプロジェクトによって異なる場合があります。必ず [`package.json`](../package.json) の `scripts` セクションを確認してください。)*
 
     * **特定のファイルまたはディレクトリを対象に実行する場合:**
         ```bash
@@ -326,43 +326,43 @@ Cairns プロジェクトの **全ての** 検証ルール (JSON Schema の厳�
     * 検証に成功した場合 (エラーがない場合): コマンドは通常、成功を示す終了コード `0` で終了し、成功メッセージが表示されます。
     * 検証に失敗した場合 (エラーがある場合): 発見されたエラーの詳細メッセージがコンソールに出力され、コマンドは失敗を示す非ゼロの終了コード (例: `1`) で終了します。
 
-#### 2.3.2.2. コマンド内容の説明
+##### 2.3.2.2. コマンド内容の説明 {h5-command-description}
 
-上記の `npm run validate` (または同等のコマンド) は、内部でカスタム検証スクリプト (例: ［`scripts/validate.js`］(../../scripts/validate.js) や ［`scripts/validate_cairns_rules.js`］(../../scripts/validate_cairns_rules.js) など、実際のスクリプト名はプロジェクトの実装によります) を呼び出しています。このスクリプトは、以下のステップで検証を実行します。
+上記の `npm run validate` (または同等のコマンド) は、内部でカスタム検証スクリプト (例: [`scripts/validate.js`](../scripts/validate.js) や [`scripts/validate_cairns_rules.js`](../scripts/validate_cairns_rules.js) など、実際のスクリプト名はプロジェクトの実装によります) を呼び出しています。このスクリプトは、以下のステップで検証を実行します。
 
 1.  **対象ファイルの探索:** コマンドライン引数で指定されたパス、またはリポジトリ全体から、検証対象となる Markdown ファイル (`.md`) を特定します。
 2.  **Front Matter の抽出:** 特定された各 Markdown ファイルから、YAML Front Matter 部分を抽出・パースします (例: `gray-matter` ライブラリを使用)。
-3.  **JSON Schema 検証 (厳密):** 抽出した Front Matter オブジェクトを、CI 環境と同じ JSON Schema バリデーターライブラリ (例: `ajv` または `jsonschema` など、［`devtools-list.md`］(../devtools-list.md) A3 参照) を用いて、［`schema/cairns-front-matter.schema.json`］(../../schema/cairns-front-matter.schema.json) に対して**厳密に**検証します。これには Draft 2020-12 の高度な機能の検証も含まれます。
-4.  **カスタムルール検証:** JSON Schema 検証をパスしたドキュメントに対して、プロジェクト固有のカスタムルールをチェックします。これには、［セクション 2.3.1.2］(#TODO-link-to-section-2-3-1-2) で挙げた以下の項目などが含まれます:
+3.  **JSON Schema 検証 (厳密):** 抽出した Front Matter オブジェクトを、CI 環境と同じ JSON Schema バリデーターライブラリ (例: `ajv` または `jsonschema` など、[`devtools-list.md`](devtools-list.md) A3 参照) を用いて、[`schema/cairns-front-matter.schema.json`](../schema/cairns-front-matter.schema.json) に対して**厳密に**検証します。これには Draft 2020-12 の高度な機能の検証も含まれます。
+4.  **カスタムルール検証:** JSON Schema 検証をパスしたドキュメントに対して、プロジェクト固有のカスタムルールをチェックします。これには、[セクション 2.3.1.2](#h5-limitations-no-custom-rules) で挙げた以下の項目などが含まれます:
     * ID とファイル名の一致
     * 参照整合性 (スニペット、メディア、ドキュメントID、原則ID、アンカー等の存在確認)
     * 時間整合性 (`created_at`, `last_updated`, `expires_at` の順序)
     * 構造整合性 (`core_principles` の記述ルールなど)
     * ID の一意性
-    * *(カスタムルールの詳細については、［セクション 5「カスタム検証ルールの詳細」］(#TODO-link-to-section-5) を参照してください。)*
+    * *(カスタムルールの詳細については、[セクション 5「カスタム検証ルールの詳細」](#h2-custom-validation-rule-details) を参照してください。)*
 5.  **結果の表示:** 全ての検証が成功した場合は、成功した旨のメッセージを表示します。エラーが検出された場合は、どのファイルのどの部分で、どのルールに違反したかの詳細なエラーメッセージをコンソールに出力します。
 
 * **ポイント:**
     * このカスタム検証スクリプトによる検証が、CI/CD パイプラインで実行されるものと**同等レベル**であり、プロジェクトの品質基準を満たしていることを確認するための**最も信頼性の高いローカル検証手段**です。
     * コミットや Pull Request を作成する前には、**必ずこの検証を実行し、エラーが出ないことを確認**してください。
-    * 検証でエラーが発生した場合の具体的なエラーメッセージ例とその解決策については、次セクション ［2.4 よくあるエラーとその対処法］(#TODO-link-to-section-2-4) で詳しく解説します。
+    * 検証でエラーが発生した場合の具体的なエラーメッセージ例とその解決策については、次セクション [2.4 よくあるエラーとその対処法](#h3-common-errors-and-solutions) で詳しく解説します。
 
 -----
 
-### 2.4. よくあるエラーとその対処法
+### 2.4. よくあるエラーとその対処法 {#h3-common-errors-and-solutions}
 
 このセクションでは、セクション 2.3.2 で解説したカスタム検証スクリプトを実行した際に遭遇する可能性のある、典型的なエラーメッセージとその原因、具体的な対処法を解説します。
 ここで紹介するエラーは、JSON Schema による構造的な違反と、Cairns プロジェクト固有のカスタムルール違反に大別されます。
 これらのエラーをローカルで早期に特定し修正することで、CI/CD パイプラインでの失敗を防ぎ、開発プロセスをスムーズに進めることができます。
 
-#### 2.4.1. スキーマ違反エラー (例)
+#### 2.4.1. スキーマ違反エラー (例) {#h4-schema-violation-errors}
 
-カスタム検証スクリプトは、まず [`schema/cairns-front-matter.schema.json`](../../schema/cairns-front-matter.schema.json) に基づいて Front Matter の基本的な構造を検証します (セクション 2.3.2.2 ステップ 3 参照)。
+カスタム検証スクリプトは、まず [`schema/cairns-front-matter.schema.json`](../schema/cairns-front-matter.schema.json) に基づいて Front Matter の基本的な構造を検証します (セクション 2.3.2.2 ステップ 3 参照)。
 ここでは、このスキーマ検証でよく発生するエラーの例を示します。
 
 **注意:** VSCode 拡張機能 (`redhat.vscode-yaml` 等) でも、これらの基本的なスキーマ違反の一部はリアルタイムで検出される可能性があります。しかし、セクション 2.1.3 および 2.3.1.2 で述べた通り、拡張機能は JSON Schema Draft 2020-12 の高度な機能 (例: `$dynamicRef`) を完全にはサポートしていない可能性があり、またカスタムルールは一切検証できません。したがって、**カスタム検証スクリプトによるチェックが、スキーマ適合性を確認する最も信頼性の高い方法であり、コミット前には必須**となります。
 
-##### 2.4.1.1. 型間違い
+##### 2.4.1.1. 型間違い {h5-type-mismatch}
 
   * **典型的なエラーメッセージ:**
 
@@ -373,16 +373,16 @@ Cairns プロジェクトの **全ての** 検証ルール (JSON Schema の厳�
 
   * **原因:**
     Front Matter のフィールドに、JSON Schema で定義されたデータ型 (例: `string`, `integer`, `boolean`, `array`, `object`) と異なる型の値が指定されています。
-    上記例では、`review_cycle_days` フィールド (スキーマ定義: `metadata-defs.schema.json` -\> `integer`) に文字列 (`"90"` など) が指定されている場合に発生します。
-    各フィールドの正しいデータ型は [`schema/cairns-front-matter.schema.json`](../../schema/cairns-front-matter.schema.json) およびそれが参照する `*-defs.schema.json` ファイルで定義されています。
+    上記例では、`review_cycle_days` フィールド (スキーマ定義: `metadata-defs.schema.json` -> `integer`) に文字列 (`"90"` など) が指定されている場合に発生します。
+    各フィールドの正しいデータ型は [`schema/cairns-front-matter.schema.json`](../schema/cairns-front-matter.schema.json) およびそれが参照する `*-defs.schema.json` ファイルで定義されています。
 
   * **対処法:**
 
     1.  エラーメッセージで指摘されたフィールド (`review_cycle_days` など) とその値 (`Value: "90"` など) を確認します。
-    2.  エラーメッセージ内の期待される型 (`Message: must be integer` など) や、`_dev_docs/front-matter-guidelines.md` のフィールド解説セクション、または [`schema/cairns-front-matter.schema.json`](../../schema/cairns-front-matter.schema.json) (及び関連スキーマ) を参照し、該当フィールドに期待される正しいデータ型 (例: `integer`) を確認します。
+    2.  エラーメッセージ内の期待される型 (`Message: must be integer` など) や、`_dev_docs/front-matter-guidelines.md` のフィールド解説セクション、または [`schema/cairns-front-matter.schema.json`](../schema/cairns-front-matter.schema.json) (及び関連スキーマ) を参照し、該当フィールドに期待される正しいデータ型 (例: `integer`) を確認します。
     3.  値を正しいデータ型に修正します (例: `"90"` (文字列) を `90` (数値) に修正)。
 
-##### 2.4.1.2. パターン不一致 (`id` 等)
+##### 2.4.1.2. パターン不一致 (`id` 等) {h5-pattern-mismatch-id}
 
   * **典型的なエラーメッセージ:**
 
@@ -392,18 +392,18 @@ Cairns プロジェクトの **全ての** 検証ルール (JSON Schema の厳�
     ```
 
   * **原因:**
-    Front Matter のフィールドに、JSON Schema ([`schema/patterns.schema.json`](../../schema/patterns.schema.json)) で定義された正規表現パターン (`pattern`) に一致しない値が指定されています。
-    上記例は、`id` フィールド ([`patterns.schema.json#pattern-docId`](../../schema/patterns.schema.json)) で、許可されていない文字 (例: 大文字 `L`, `S`, `D` やアンダースコア `_`) が使用されている場合に発生します。
-    **重要:** スキーマパターン (`^[a-z0-9\\-\\.]+$`) ではドット (`.`) が許可されていますが、Cairns の命名規則 ([`naming-conventions.md`](../naming-conventions.md)) では**ハイフン (`-`) のみを推奨**しています。カスタム検証スクリプトは ID 整合性チェック (2.4.2.1 参照) で**命名規則違反も検出**するため、スキーマのパターンには一致していても、命名規則違反としてエラーになる可能性があります。**混乱を避けるため、常に [`naming-conventions.md`](../naming-conventions.md) の規約に従うことを強く推奨します。**
-    他にも `version` (SemVer [`patterns.schema.json#pattern-semVer`](../../schema/patterns.schema.json))、`language` (BCP-47 [`patterns.schema.json#pattern-bcp47LangCode`](../../schema/patterns.schema.json)) など、多くのフィールドでパターンが定義されています。
+    Front Matter のフィールドに、JSON Schema ([`schema/patterns.schema.json`](../schema/patterns.schema.json)) で定義された正規表現パターン (`pattern`) に一致しない値が指定されています。
+    上記例は、`id` フィールド ([`patterns.schema.json#pattern-docId`](../schema/patterns.schema.json)) で、許可されていない文字 (例: 大文字 `L`, `S`, `D` やアンダースコア `_`) が使用されている場合に発生します。
+    **重要:** スキーマパターン (`^[a-z0-9\\-\\.]+$`) ではドット (`.`) が許可されていますが、Cairns の命名規則 ([`naming-conventions.md`](naming-conventions.md)) では**ハイフン (`-`) のみを推奨**しています。カスタム検証スクリプトは ID 整合性チェック (2.4.2.1 参照) で**命名規則違反も検出**するため、スキーマのパターンには一致していても、命名規則違反としてエラーになる可能性があります。**混乱を避けるため、常に [`naming-conventions.md`](naming-conventions.md) の規約に従うことを強く推奨します。**
+    他にも `version` (SemVer [`patterns.schema.json#pattern-semVer`](../schema/patterns.schema.json))、`language` (BCP-47 [`patterns.schema.json#pattern-bcp47LangCode`](../schema/patterns.schema.json)) など、多くのフィールドでパターンが定義されています。
 
   * **対処法:**
 
     1.  エラーメッセージで指摘されたフィールド (`id` など) とその値 (`Value: "L2-Sample_Doc"` など) を確認します。
-    2.  エラーメッセージ内の期待されるパターン (`Message: must match pattern "..."` など) や、`_dev_docs/front-matter-guidelines.md` のフィールド解説、[`schema/patterns.schema.json`](../../schema/patterns.schema.json)、そして**最優先で [`naming-conventions.md`](../naming-conventions.md) を参照**し、期待されるフォーマットを確認します。
-    3.  値をパターンおよび**命名規則**に一致するように修正します (例: `id` を小文字とハイフンのみに修正: `'L2-Sample_Doc'` -\> `'l2-sample-doc'`)。
+    2.  エラーメッセージ内の期待されるパターン (`Message: must match pattern "..."` など) や、`_dev_docs/front-matter-guidelines.md` のフィールド解説、[`schema/patterns.schema.json`](../schema/patterns.schema.json)、そして**最優先で [`naming-conventions.md`](naming-conventions.md) を参照**し、期待されるフォーマットを確認します。
+    3.  値をパターンおよび**命名規則**に一致するように修正します (例: `id` を小文字とハイフンのみに修正: `'L2-Sample_Doc'` -> `'l2-sample-doc'`)。
 
-##### 2.4.1.3. 日時フォーマット (`last_updated` 等)
+##### 2.4.1.3. 日時フォーマット (`last_updated` 等) {h5-datetime-format-last-updated}
 
   * **典型的なエラーメッセージ:**
 
@@ -414,24 +414,24 @@ Cairns プロジェクトの **全ての** 検証ルール (JSON Schema の厳�
 
   * **原因:**
     日時の指定が期待されるフィールド (`created_at`, `last_updated`, `expires_at`) に、JSON Schema で定義された `date-time` フォーマット (ISO 8601 形式) に従わない値が指定されています。
-    スキーマ ([`cairns-front-matter.schema.json`](../../schema/cairns-front-matter.schema.json)) ではこれらのフィールドに `format: date-time` が指定されています。
+    スキーマ ([`cairns-front-matter.schema.json`](../schema/cairns-front-matter.schema.json)) ではこれらのフィールドに `format: date-time` が指定されています。
 
   * **対処法:**
 
     1.  エラーメッセージで指摘された日時フィールド (`last_updated` など) とその値 (`Value: "2025/04/30 10:00"` など) を確認します。
     2.  値を **ISO 8601 形式** (`YYYY-MM-DDTHH:mm:ssZ` または `YYYY-MM-DDTHH:mm:ss+HH:mm` / `-HH:mm`) に修正します。
-    3.  例: `'2025/04/30 10:00'` -\> `'2025-04-30T10:00:00Z'` (UTCの場合) または `'2025-04-30T10:00:00+09:00'` (JSTの場合)。
+    3.  例: `'2025/04/30 10:00'` -> `'2025-04-30T10:00:00Z'` (UTCの場合) または `'2025-04-30T10:00:00+09:00'` (JSTの場合)。
     4.  **推奨:** タイムゾーンオフセットを含めることで曖昧さをなくします。UTC (`Z`) またはローカルタイムゾーンのオフセット (例: `+09:00`) を明記してください。
 
-#### 2.4.2. カスタム検証ルール違反エラー (例)
+#### 2.4.2. カスタム検証ルール違反エラー (例) {#h4-custom-rule-violation-errors}
 
 JSON Schema による基本的な構造チェックに加え、カスタム検証スクリプトは Cairns プロジェクト固有のルール (セクション 2.1.1 で解説) をチェックします (セクション 2.3.2.2 ステップ 4 参照)。
-これらのルールは、ドキュメント間の整合性やプロジェクトの規約 ([`document-map.md`](../document-map.md), [`naming-conventions.md`](../naming-conventions.md), [`folder-structure.md`](../folder-structure.md) 等) を維持するために重要です。ここでは、これらのカスタムルール違反でよく発生するエラーの例を示します。
+これらのルールは、ドキュメント間の整合性やプロジェクトの規約 ([`document-map.md`](document-map.md), [`naming-conventions.md`](naming-conventions.md), [`folder-structure.md`](folder-structure.md) 等) を維持するために重要です。ここでは、これらのカスタムルール違反でよく発生するエラーの例を示します。
 これらのエラーは VSCode 拡張機能では検出できません。
 
 **注記:** ここに示すエラーメッセージ例 (`Error [Custom Rule]: ...`) は、カスタム検証スクリプトがより詳細な情報を提供するために整形したものです。実際の出力はスクリプトの実装によって若干異なる場合があります。
 
-##### 2.4.2.1. ID 整合性違反
+##### 2.4.2.1. ID 整合性違反 {h5-id-consistency-violation}
 
   * **典型的なエラーメッセージ:**
 
@@ -456,9 +456,9 @@ JSON Schema による基本的な構造チェックに加え、カスタム検�
     ```
 
   * **原因:**
-    Cairns プロジェクトの重要なルールである ID に関する整合性違反です ([`devtools-list.md`](../devtools-list.md) A6.2, [`document-map.md`](../document-map.md) CI 検証項目参照)。
+    Cairns プロジェクトの重要なルールである ID に関する整合性違反です ([`devtools-list.md`](devtools-list.md) A6.2, [`document-map.md`](document-map.md) CI 検証項目参照)。
 
-      * **ID とファイル名の不一致:** Front Matter の `id` フィールドの値が、その Markdown ファイルのファイル名 (拡張子 `.md` を除く) と完全に一致していません。このルールは [`naming-conventions.md`](../naming-conventions.md) で定義されています。
+      * **ID とファイル名の不一致:** Front Matter の `id` フィールドの値が、その Markdown ファイルのファイル名 (拡張子 `.md` を除く) と完全に一致していません。このルールは [`naming-conventions.md`](naming-conventions.md) で定義されています。
       * **ドキュメント ID の重複:** 定義されたドキュメント `id` が、リポジトリ内の他のドキュメントで既に使用されています。ドキュメント ID は Cairns 全体で一意である必要があります。
       * **原則 ID の重複:** `core_principles` 配列内で、同じ `principle_id` が複数回定義されています。原則 ID は同一ドキュメント内で一意である必要があります。
 
@@ -466,8 +466,8 @@ JSON Schema による基本的な構造チェックに加え、カスタム検�
 
       * **ID とファイル名の不一致の場合:**
         1.  エラーメッセージで指摘されたファイルの `id` フィールドとファイル名を確認します。
-        2.  [`naming-conventions.md`](../naming-conventions.md) を参照し、命名規則 (小文字、ハイフン区切り推奨) を確認します。
-        3.  `id` フィールドの値かファイル名のどちらか (または両方) を修正し、完全に一致させます。ファイル名を変更する場合は、Git の履歴追跡のため `git mv` コマンドの使用を推奨します ([`document-map.md`](../document-map.md) 運用ベストプラクティス参照)。
+        2.  [`naming-conventions.md`](naming-conventions.md) を参照し、命名規則 (小文字、ハイフン区切り推奨) を確認します。
+        3.  `id` フィールドの値かファイル名のどちらか (または両方) を修正し、完全に一致させます。ファイル名を変更する場合は、Git の履歴追跡のため `git mv` コマンドの使用を推奨します ([`document-map.md`](document-map.md) 運用ベストプラクティス参照)。
       * **ドキュメント ID の重複の場合:**
         1.  エラーメッセージで指摘された重複している ID とファイルパスを確認します。
         2.  新しく作成または編集しているドキュメントの `id` を、リポジトリ内で一意となるように変更します。
@@ -476,7 +476,7 @@ JSON Schema による基本的な構造チェックに加え、カスタム検�
         1.  エラーメッセージで指摘されたドキュメントファイル内の `core_principles` 配列を確認します。
         2.  重複している `principle_id` を特定し、ドキュメント内で一意になるように修正します。
 
-##### 2.4.2.2. スニペット参照整合性違反
+##### 2.4.2.2. スニペット参照整合性違反 {h5-snippet-reference-violation}
 
   * **典型的なエラーメッセージ:**
 
@@ -495,11 +495,11 @@ JSON Schema による基本的な構造チェックに加え、カスタム検�
     ```
 
   * **原因:**
-    `core_principles[].snippet_refs` で指定されたコードスニペットファイルへの参照に問題があります ([`devtools-list.md`](../devtools-list.md) A6.1, [`document-map.md`](../document-map.md) CI 検証項目参照)。
+    `core_principles[].snippet_refs` で指定されたコードスニペットファイルへの参照に問題があります ([`devtools-list.md`](devtools-list.md) A6.1, [`document-map.md`](document-map.md) CI 検証項目参照)。
 
       * **ファイルが存在しない:** 指定されたパス (`./snippets/...` 形式) にファイルが存在しません。
-      * **パス形式が規約違反:** スニペットファイルのパスが、推奨される形式 (`./snippets/<doc-id>/<principle-id>.code.md`) に従っていません。このパス形式は [`folder-structure.md#43-snippets`](../folder-structure.md) で定義されており、参照元ドキュメントと原則を明確にするための規約です。スキーマ ([`patterns.schema.json#pattern-snippetPath`](../../schema/patterns.schema.json)) では、この形式 (拡張子が `.code.md`) が定義されています。カスタム検証スクリプトはこのスキーマ定義と規約に基づいてチェックを行います。**.code.md 以外の拡張子を使用したい場合は、規約やスキーマの改訂が必要になる可能性があります。**
-      * **補足:** 同様の参照整合性チェックは `media[].path` (画像等)、`relationships[].to`, `references[].doc_id`, `deprecation_info` (他ドキュメント/原則 ID)、`detail_ref`, `core_principles[].detail_ref` (Markdown 内アンカー) など、他の参照フィールドに対しても行われます ([`devtools-list.md`](../devtools-list.md) A6.1)。これらのエラーもファイル/ID/アンカーが存在しない、または形式が不正な場合に同様のパターンで発生します。**これらのフィールドに関する具体的なエラー例や詳細な検証ルールについては、[セクション 5「カスタム検証ルールの詳細」](#5-カスタム検証ルールの詳細) で網羅的に解説します。**
+      * **パス形式が規約違反:** スニペットファイルのパスが、推奨される形式 (`./snippets/<doc-id>/<principle-id>.code.md`) に従っていません。このパス形式は [`folder-structure.md#h3-snippets-directory`](folder-structure.md#h3-snippets-directory) で定義されており、参照元ドキュメントと原則を明確にするための規約です。スキーマ ([`patterns.schema.json#pattern-snippetPath`](../schema/patterns.schema.json)) では、この形式 (拡張子が `.code.md`) が定義されています。カスタム検証スクリプトはこのスキーマ定義と規約に基づいてチェックを行います。**.code.md 以外の拡張子を使用したい場合は、規約やスキーマの改訂が必要になる可能性があります。**
+      * **補足:** 同様の参照整合性チェックは `media[].path` (画像等)、`relationships[].to`, `references[].doc_id`, `deprecation_info` (他ドキュメント/原則 ID)、`detail_ref`, `core_principles[].detail_ref` (Markdown 内アンカー) など、他の参照フィールドに対しても行われます ([`devtools-list.md`](devtools-list.md) A6.1)。これらのエラーもファイル/ID/アンカーが存在しない、または形式が不正な場合に同様のパターンで発生します。**これらのフィールドに関する具体的なエラー例や詳細な検証ルールについては、[セクション 5「カスタム検証ルールの詳細」](#h2-custom-validation-rule-details) で網羅的に解説します。**
 
   * **対処法:**
 
@@ -508,13 +508,13 @@ JSON Schema による基本的な構造チェックに加え、カスタム検�
           * `snippets/` ディレクトリ以下を確認し、ファイル名やパスが正しいか確認します。タイプミスがないか注意してください。
           * もしファイルが存在しない場合は、正しいファイルを作成するか、Front Matter の参照を修正・削除します。
     3.  **パス形式が規約違反の場合:**
-          * [`folder-structure.md#43-snippets`](../folder-structure.md) および [`patterns.schema.json#pattern-snippetPath`](../../schema/patterns.schema.json) を参照し、正しいパス構造 (`./snippets/<doc-id>/<principle-id>.code.md`) を確認します。
+          * [`folder-structure.md#h3-snippets-directory`](folder-structure.md#h3-snippets-directory) および [`patterns.schema.json#pattern-snippetPath`](../schema/patterns.schema.json) を参照し、正しいパス構造 (`./snippets/<doc-id>/<principle-id>.code.md`) を確認します。
           * 参照元ドキュメントの `id` と、関連する原則の `principle_id` を使用して、正しいパスを構築します。
           * スニペットファイルを正しいパスに移動するか、Front Matter の参照パスを修正します。
           * **重要:** パスは必ず `./` で始まる相対パスである必要があります。拡張子は現時点では `.code.md` に従ってください。
-    4.  他の参照フィールド (メディア、ドキュメントID、アンカー等) で同様のエラーが出た場合も、参照先が存在するか、ID やアンカー名が正しいかを確認・修正します。Markdown 本文内のアンカー (`<a id="..."></a>` または見出しの自動生成アンカー) が正しく設定されているかも確認してください。
+    4.  他の参照フィールド (メディア、ドキュメントID、アンカー等) で同様のエラーが出た場合も、参照先が存在するか、ID やアンカー名が正しいかを確認・修正します。Markdown 本文内のアンカー (`{<level>-<topic-slug>}` または見出しの自動生成アンカー) が正しく設定されているかも確認してください。
 
-##### 2.4.2.3. Core Principle 構造違反 (L3+)
+##### 2.4.2.3. Core Principle 構造違反 (L3+) {h5-core-principle-structure-violation-l3plus}
 
   * **典型的なエラーメッセージ:**
 
@@ -539,16 +539,16 @@ JSON Schema による基本的な構造チェックに加え、カスタム検�
     ```
 
   * **原因:**
-    `core_principles` フィールドの記述方法が、ドキュメントのレイヤー (`layer`) に関するルール ([`document-map.md`](../document-map.md) で定義) やスキーマ ([`cairns-front-matter.schema.json`](../../schema/cairns-front-matter.schema.json)) に違反しています。カスタム検証スクリプト ([`devtools-list.md`](../devtools-list.md) A6) および CI (`document-map.md`) でチェックされます。
+    `core_principles` フィールドの記述方法が、ドキュメントのレイヤー (`layer`) に関するルール ([`document-map.md`](document-map.md) で定義) やスキーマ ([`cairns-front-matter.schema.json`](../schema/cairns-front-matter.schema.json)) に違反しています。カスタム検証スクリプト ([`devtools-list.md`](devtools-list.md) A6) および CI (`document-map.md`) でチェックされます。
 
-      * **L3 以上のドキュメントでの原則数:** [`document-map.md`](../document-map.md) では、L3 以上のドキュメント (プロセス、ガイドライン等) では、原則としてドキュメント全体の主題を示す**単一の**原則 (`core_principles` 配列の要素数が 1) を定義することを推奨しています。上記例では、L3 ドキュメントに複数の原則が定義されている場合にエラーとなります。
-      * **L3 以上のドキュメントでの原則 ID 命名:** L3 以上で単一原則を定義する場合、その `principle_id` は `<doc-id>-main` という形式 (例: `l3-dev-workflow-main`) にすることを推奨しています ([`document-map.md`](../document-map.md))。これにより、その原則がドキュメント全体を表すものであることが明確になります。
-      * **必須フィールドの欠落:** L0-L4 レイヤーのドキュメントでは `core_principles` フィールド自体が必須です ([`cairns-front-matter.schema.json`](../../schema/cairns-front-matter.schema.json) の `if/then` 句参照)。これが未定義または空配列 (`[]`) の場合にエラーとなります。
+      * **L3 以上のドキュメントでの原則数:** [`document-map.md`](document-map.md) では、L3 以上のドキュメント (プロセス、ガイドライン等) では、原則としてドキュメント全体の主題を示す**単一の**原則 (`core_principles` 配列の要素数が 1) を定義することを推奨しています。上記例では、L3 ドキュメントに複数の原則が定義されている場合にエラーとなります。
+      * **L3 以上のドキュメントでの原則 ID 命名:** L3 以上で単一原則を定義する場合、その `principle_id` は `<doc-id>-main` という形式 (例: `l3-dev-workflow-main`) にすることを推奨しています ([`document-map.md`](document-map.md))。これにより、その原則がドキュメント全体を表すものであることが明確になります。
+      * **必須フィールドの欠落:** L0-L4 レイヤーのドキュメントでは `core_principles` フィールド自体が必須です ([`cairns-front-matter.schema.json`](../schema/cairns-front-matter.schema.json) の `if/then` 句参照)。これが未定義または空配列 (`[]`) の場合にエラーとなります。
 
   * **対処法:**
 
     1.  エラーメッセージで指摘されたドキュメントの `layer` と `core_principles` の内容を確認します。
-    2.  [`document-map.md`](../document-map.md) の `core_principles` に関する記述ルールと、[`cairns-front-matter.schema.json`](../../schema/cairns-front-matter.schema.json) の定義を参照します。
+    2.  [`document-map.md`](document-map.md) の `core_principles` に関する記述ルールと、[`cairns-front-matter.schema.json`](../schema/cairns-front-matter.schema.json) の定義を参照します。
     3.  **L3 以上のドキュメントで原則数が違反している場合:**
           * ドキュメントの主題を表す単一の原則に集約することを検討します。
           * 例外的に複数の原則が必要な場合は、その妥当性を再評価し、必要であれば設計者やレビュアーと相談します (`_dev_docs/front-matter-guidelines.md` セクション 3 フィールド解説 `core_principles` 参照)。
@@ -558,7 +558,7 @@ JSON Schema による基本的な構造チェックに加え、カスタム検�
     5.  **L0-L4 ドキュメントで `core_principles` が未定義または空配列の場合:**
           * ドキュメントの内容を表す適切な原則を最低一つ定義します。L2 文書であれば複数の原則を、L3/L4 であれば単一の原則 (`<doc-id>-main` 形式) を定義します。
 
-##### 2.4.2.4. 時間整合性違反 (`last_updated` vs `created_at`)
+##### 2.4.2.4. 時間整合性違反 (`last_updated` vs `created_at`) {h5-temporal-consistency-violation-last-updated-vs-created-at}
 
   * **典型的なエラーメッセージ:**
 
@@ -570,7 +570,7 @@ JSON Schema による基本的な構造チェックに加え、カスタム検�
 
   * **原因:**
     Front Matter 内の日時フィールド (`created_at`, `last_updated`, `expires_at`) の間に時間的な矛盾があります。
-    カスタム検証スクリプト ([`devtools-list.md`](../devtools-list.md) A6.3) および CI ([`document-map.md`](../document-map.md) CI 検証項目参照) は、以下の順序が保たれているかをチェックします (各フィールドが存在する場合):
+    カスタム検証スクリプト ([`devtools-list.md`](devtools-list.md) A6.3) および CI ([`document-map.md`](document-map.md) CI 検証項目参照) は、以下の順序が保たれているかをチェックします (各フィールドが存在する場合):
     `created_at <= last_updated <= expires_at`
     上記例では、`last_updated` が `created_at` より過去の日時になっています。
 
@@ -583,66 +583,66 @@ JSON Schema による基本的な構造チェックに加え、カスタム検�
 
 ---
 
-上記は代表的なエラーの例です。カスタム検証スクリプトはこれら以外にも、状態整合性 (`status` と `deprecation_info`, `checksum`, `signed_by` 等の関係) やガバナンス関連のチェック ([`devtools-list.md`](../devtools-list.md) A6, B3, B4)、その他の参照整合性チェック ([`document-map.md`](../document-map.md) CI項目参照) など、様々な検証を行う可能性があります。
-エラーメッセージをよく読み、関連するスキーマ定義 ([`schema/`](../../schema/)) やガイドライン ([`_dev_docs/front-matter-guidelines.md`](../front-matter-guidelines.md), [`_dev_docs/document-map.md`](../document-map.md), [`_dev_docs/naming-conventions.md`](../naming-conventions.md), [`_dev_docs/folder-structure.md`](../folder-structure.md)) を参照することで、ほとんどの問題は解決できるはずです。
-**ここで挙げた例以外のカスタム検証ルールや、より詳細なエラーケースについては、[セクション 5「カスタム検証ルールの詳細」](#5-カスタム検証ルールの詳細) を参照してください。** 状態整合性やガバナンス関連のエラー、その他の参照整合性エラーについても、セクション 5 で網羅的に解説します。
+上記は代表的なエラーの例です。カスタム検証スクリプトはこれら以外にも、状態整合性 (`status` と `deprecation_info`, `checksum`, `signed_by` 等の関係) やガバナンス関連のチェック ([`devtools-list.md`](devtools-list.md) A6, B3, B4)、その他の参照整合性チェック ([`document-map.md`](document-map.md) CI項目参照) など、様々な検証を行う可能性があります。
+エラーメッセージをよく読み、関連するスキーマ定義 ([`schema/`](../schema/)) やガイドライン ([`_dev_docs/front-matter-guidelines.md`](front-matter-guidelines.md), [`_dev_docs/document-map.md`](document-map.md), [`_dev_docs/naming-conventions.md`](naming-conventions.md), [`_dev_docs/folder-structure.md`](folder-structure.md)) を参照することで、ほとんどの問題は解決できるはずです。
+**ここで挙げた例以外のカスタム検証ルールや、より詳細なエラーケースについては、[セクション 5「カスタム検証ルールの詳細」](#h2-custom-validation-rule-details) を参照してください。** 状態整合性やガバナンス関連のエラー、その他の参照整合性エラーについても、セクション 5 で網羅的に解説します。
 不明な点や解決困難なエラーに遭遇した場合は、プロジェクトのメンテナーや他の開発者に相談してください。
 
 -----
 
-## 2.5. CI における検証 <a id="ci-validation"></a>
+### 2.5. CI における検証 {#h3-validation-in-ci}
 
 これまでのセクション (2.1〜2.4) では、Cairns ドキュメントの品質を維持し、開発者体験 (DX) を向上させるための**ローカル検証**の重要性と具体的な方法について解説してきました。本セクションでは、それらの検証がプロジェクトの継続的インテグレーション/継続的デリバリー (CI/CD) パイプラインにおいてどのように実行され、リポジトリ全体の品質保証にどう貢献するのかを説明します。
 
 CI/CD パイプラインにおける自動検証は、ローカルでのチェックを補完し、プロジェクト全体の品質を維持するための**品質ゲート**として機能します。ローカル検証を励行することで CI でのエラーを未然に防ぐことが強く推奨されますが、CI の仕組みを理解することも重要です。
 
-### 2.5.1. CI 検証の目的と位置づけ <a id="purpose-and-positioning-of-ci-validation"></a>
+#### 2.5.1. CI 検証の目的と位置づけ {#h4-ci-validation-purpose-positioning}
 
-CI/CD パイプライン (例: GitHub Actions - [`devtools-list.md`](../devtools-list.md) A5: CI/CD プラットフォーム 参照) での自動検証は、プロジェクト全体の品質を維持するための**品質保証プロセス**です。
+CI/CD パイプライン (例: GitHub Actions - [`devtools-list.md`](devtools-list.md) A5: CI/CD プラットフォーム 参照) での自動検証は、プロジェクト全体の品質を維持するための**品質保証プロセス**です。
 主な目的は以下の通りです。
 
   * ローカル検証 (セクション 2.1-2.4 参照) で見逃された可能性のあるエラーや規約違反を検出する。
   * `main` ブランチなど、保護されたブランチへのマージ前に、ドキュメントが定義された品質基準を満たしていることを保証する。
   * プロジェクト全体の整合性と一貫性を自動的に維持する。
 
-ローカル検証は**開発者への早期フィードバック**を提供し開発効率を高めるために不可欠ですが、CI 検証は**リポジトリ全体の品質を最終的に担保**する役割を担います。両者は補完関係にあり、効果的な品質管理には双方の実施が重要です ([`document-map.md`](../document-map.md) の品質維持プロセス定義も参照)。
+ローカル検証は**開発者への早期フィードバック**を提供し開発効率を高めるために不可欠ですが、CI 検証は**リポジトリ全体の品質を最終的に担保**する役割を担います。両者は補完関係にあり、効果的な品質管理には双方の実施が重要です ([`document-map.md`](document-map.md) の品質維持プロセス定義も参照)。
 
-### 2.5.2. CI 検証における注意点 <a id="ci-validation-caveats"></a>
+#### 2.5.2. CI 検証における注意点 {#h4-ci-validation-notes}
 
 CI 検証は効果的な品質保証プロセスですが、以下の点に留意が必要です。
 
-  * **実行時間:** ドキュメント数や検証ルールの複雑さが増すにつれて、CI の実行時間が長くなる可能性があります。特に全ドキュメントを対象とするカスタムルール検証 ([`devtools-list.md`](../devtools-list.md) A6.1: カスタム検証のパフォーマンス考慮事項 参照) は影響を受けやすいです。
+  * **実行時間:** ドキュメント数や検証ルールの複雑さが増すにつれて、CI の実行時間が長くなる可能性があります。特に全ドキュメントを対象とするカスタムルール検証 ([`devtools-list.md`](devtools-list.md) A6.1: カスタム検証のパフォーマンス考慮事項 参照) は影響を受けやすいです。
   * **環境差異:** ローカルの開発環境と CI 実行環境 (OS, ツールバージョン等) のわずかな違いが、稀に予期せぬ検証結果の違いを生む可能性があります。
-  * **カスタムスクリプトの保守:** Cairns 固有のルールを検証する**カスタム検証スクリプト群** (例: `scripts/` ディレクトリ配下に配置。関連ツールは [`devtools-list.md`](../devtools-list.md) A3: スキーマ検証, A6: カスタム検証, B2: RAG Index 生成, B3: Checksum 検証, B4: 署名検証 参照) は CI の中核ですが、これらのスクリプト自体もプロジェクトの進化に合わせて継続的に保守・改善していく必要があります。（**※実際のスクリプト名や構成はプロジェクトの実装や [`devtools-list.md`](../devtools-list.md) の A3, A6, B2-B4 を参照してください**）
+  * **カスタムスクリプトの保守:** Cairns 固有のルールを検証する**カスタム検証スクリプト群** (例: `scripts/` ディレクトリ配下に配置。関連ツールは [`devtools-list.md`](devtools-list.md) A3: スキーマ検証, A6: カスタム検証, B2: RAG Index 生成, B3: Checksum 検証, B4: 署名検証 参照) は CI の中核ですが、これらのスクリプト自体もプロジェクトの進化に合わせて継続的に保守・改善していく必要があります。（**※実際のスクリプト名や構成はプロジェクトの実装や [`devtools-list.md`](devtools-list.md) の A3, A6, B2-B4 を参照してください**）
 
-これらの注意点からも、CI でのエラーを未然に防ぎ、手戻りを減らすために、**可能な限りローカル環境で問題を特定・修正しておくこと**が推奨されます ([`devtools-list.md`](../devtools-list.md) A7: 開発者体験支援 参照)。
+これらの注意点からも、CI でのエラーを未然に防ぎ、手戻りを減らすために、**可能な限りローカル環境で問題を特定・修正しておくこと**が推奨されます ([`devtools-list.md`](devtools-list.md) A7: 開発者体験支援 参照)。
 
-### 2.5.3. CI で実行される主な検証・処理項目 <a id="main-validation-items-in-ci"></a>
+#### 2.5.3. CI で実行される主な検証・処理項目 {#h4-main-ci-validation-items}
 
-CI パイプラインでは、[`devtools-list.md`](../devtools-list.md) (ツールリスト) や [`document-map.md`](../document-map.md) (ドキュメント体系) で定義されたツールとルールに基づき、主に以下の検証や関連処理が自動的に実行されます。
+CI パイプラインでは、[`devtools-list.md`](devtools-list.md) (ツールリスト) や [`document-map.md`](document-map.md) (ドキュメント体系) で定義されたツールとルールに基づき、主に以下の検証や関連処理が自動的に実行されます。
 
   * **構文・スタイルチェック:**
-      * YAML Lint (`yamllint` - [`devtools-list.md`](../devtools-list.md) A1: YAML Linter): Front Matter の基本的な YAML 構文とスタイル規約 (`.yamllint`) をチェック。
-      * Markdown Lint (`markdownlint-cli2` - [`devtools-list.md`](../devtools-list.md) A2: Markdown Linter): Markdown 本文の構文とスタイル規約 (`.markdownlint-cli2.*`) をチェック。
+      * YAML Lint (`yamllint` - [`devtools-list.md`](devtools-list.md) A1: YAML Linter): Front Matter の基本的な YAML 構文とスタイル規約 (`.yamllint`) をチェック。
+      * Markdown Lint (`markdownlint-cli2` - [`devtools-list.md`](devtools-list.md) A2: Markdown Linter): Markdown 本文の構文とスタイル規約 (`.markdownlint-cli2.*`) をチェック。
   * **Front Matter スキーマ検証:**
-      * [JSON Schema](../../schema/cairns-front-matter.schema.json) ([`devtools-list.md`](../devtools-list.md) A3: JSON Schema Validator スクリプト参照) への準拠を、カスタムスクリプトを用いて**厳密に**検証 (Draft 2020-12 の高度な機能を含む)。
+      * [JSON Schema](../schema/cairns-front-matter.schema.json) ([`devtools-list.md`](devtools-list.md) A3: JSON Schema Validator スクリプト参照) への準拠を、カスタムスクリプトを用いて**厳密に**検証 (Draft 2020-12 の高度な機能を含む)。
   * **Cairns 固有カスタムルール検証:**
-      * **カスタム検証スクリプト群** (例: `scripts/` 配下。[`devtools-list.md`](../devtools-list.md) A6: カスタム検証スクリプト 参照) により、スキーマだけでは表現できないプロジェクト固有のルールを網羅的にチェックします。（**※実際のスクリプト名や構成はプロジェクトの実装や [`devtools-list.md`](../devtools-list.md) の A6 を参照してください**）
-      * 主な検証カテゴリは以下の通りです (**各ルールの違反例については [セクション 2.4.2](#custom-validation-rule-violation-errors-example) を、ルールの網羅的な詳細については [今後のセクション 5](#section-5-custom-validation-rules-details) で解説予定です**):
+      * **カスタム検証スクリプト群** (例: `scripts/` 配下。[`devtools-list.md`](devtools-list.md) A6: カスタム検証スクリプト 参照) により、スキーマだけでは表現できないプロジェクト固有のルールを網羅的にチェックします。（**※実際のスクリプト名や構成はプロジェクトの実装や [`devtools-list.md`](devtools-list.md) の A6 を参照してください**）
+      * 主な検証カテゴリは以下の通りです (**各ルールの違反例については [セクション 2.4.2](#h4-custom-rule-violation-errors) を、ルールの網羅的な詳細については [今後のセクション 5](#h2-custom-validation-rule-details) で解説予定です**):
           * **ID 整合性:** `id` とファイル名の一致、ID の一意性など。
           * **参照整合性:** 内部リンク、スニペット、メディアファイル等の参照先の存在確認など。
           * **時間整合性・有効期限チェック:** 日時フィールド間の順序関係 (`created_at`, `last_updated`, `expires_at`) や有効期限 (`review_cycle_days`) の確認など。
           * **構造整合性:** ドキュメントレイヤーに応じた `core_principles` の記述ルールなど。
-          * **言語整合性:** `language`, `preferred_langs`, `localized_overrides` 間の整合性や、BCP-47 フォーマットの検証 (例: [`devtools-list.md`](../devtools-list.md) A6.4: 言語整合性 で推奨される `langcodes` ライブラリを利用)。
-          * **状態整合性:** `status` フィールドと関連フィールド (`deprecation_info`, `license`, `checksum`, `signed_by`) の整合性検証。これには、特定ステータス (`APPROVED`/`FIXED`) における **Checksum 検証** ([`devtools-list.md`](../devtools-list.md) B3: Checksum 生成・検証ツール) や**署名検証** ([`devtools-list.md`](../devtools-list.md) B4: 署名検証ツール) が含まれます。**(※署名検証 (B4) の導入には、GitHub Actions Secrets 等を利用した鍵管理プロセスの確立が前提となります。詳細は [`devtools-list.md`](../devtools-list.md) B4: 署名検証ツール の導入方針/備考を参照してください)**
+          * **言語整合性:** `language`, `preferred_langs`, `localized_overrides` 間の整合性や、BCP-47 フォーマットの検証 (例: [`devtools-list.md`](devtools-list.md) A6.4: 言語整合性 で推奨される `langcodes` ライブラリを利用)。
+          * **状態整合性:** `status` フィールドと関連フィールド (`deprecation_info`, `license`, `checksum`, `signed_by`) の整合性検証。これには、特定ステータス (`APPROVED`/`FIXED`) における **Checksum 検証** ([`devtools-list.md`](devtools-list.md) B3: Checksum 生成・検証ツール) や**署名検証** ([`devtools-list.md`](devtools-list.md) B4: 署名検証ツール) が含まれます。**(※署名検証 (B4) の導入には、GitHub Actions Secrets 等を利用した鍵管理プロセスの確立が前提となります。詳細は [`devtools-list.md`](devtools-list.md) B4: 署名検証ツール の導入方針/備考を参照してください)**
   * **RAG Index 生成:**
-      * RAG (Retrieval-Augmented Generation) システムとの連携準備として、インデックスファイル (`index.ndjson`) を生成します (詳細は [`devtools-list.md`](../devtools-list.md) B2: RAG Index 生成ツール 参照)。
+      * RAG (Retrieval-Augmented Generation) システムとの連携準備として、インデックスファイル (`index.ndjson`) を生成します (詳細は [`devtools-list.md`](devtools-list.md) B2: RAG Index 生成ツール 参照)。
 
-これらの検証や処理は、リポジトリの `.github/workflows/` ディレクトリ内で定義された GitHub Actions ワークフロー ([`devtools-list.md`](../devtools-list.md) A5 参照) によって実行されます。
+これらの検証や処理は、リポジトリの `.github/workflows/` ディレクトリ内で定義された GitHub Actions ワークフロー ([`devtools-list.md`](devtools-list.md) A5 参照) によって実行されます。
 
-### 2.5.4. 実行タイミングとフィードバック <a id="execution-timing-and-feedback-in-ci"></a>
+#### 2.5.4. 実行タイミングとフィードバック {#h4-ci-execution-timing-feedback}
 
-CI 検証は、通常、以下のタイミングで GitHub Actions ワークフロー ([`devtools-list.md`](../devtools-list.md) A5: CI/CD プラットフォーム 参照) によって自動的にトリガーされます。
+CI 検証は、通常、以下のタイミングで GitHub Actions ワークフロー ([`devtools-list.md`](devtools-list.md) A5: CI/CD プラットフォーム 参照) によって自動的にトリガーされます。
 
   * Pull Request (PR) の作成時または更新時
   * 特定のブランチ (例: `main`) への push 時
@@ -650,15 +650,15 @@ CI 検証は、通常、以下のタイミングで GitHub Actions ワークフ�
 検証結果は、以下のような形で開発者にフィードバックされます。
 
   * **GitHub Checks:** PR 画面に、各検証ステップ（Lint, Schema Check, Custom Rules Check など）の成功/失敗ステータスが表示されます。
-  * **ログ:** 各ステップの詳細な実行ログを確認でき、エラーが発生した場合は具体的なエラーメッセージ（[セクション 2.4](#common-errors-and-troubleshooting) で解説したようなメッセージ）と発生箇所を特定できます。
+  * **ログ:** 各ステップの詳細な実行ログを確認でき、エラーが発生した場合は具体的なエラーメッセージ（[セクション 2.4](#h3-common-errors-and-solutions) で解説したようなメッセージ）と発生箇所を特定できます。
   * **(設定により)** **インラインコメント:** Lint 違反などが PR の該当行に直接コメントとして表示される場合があります (`reviewdog/action-yamllint` など)。
-  * **マージブロック:** 必須チェックとして設定された検証が失敗した場合、PR のマージが自動的にブロックされます ([`devtools-list.md`](../devtools-list.md) A5.3: PRフィードバック/マージブロック)。
+  * **マージブロック:** 必須チェックとして設定された検証が失敗した場合、PR のマージが自動的にブロックされます ([`devtools-list.md`](devtools-list.md) A5.3: PRフィードバック/マージブロック)。
 
 CI でエラーが検出された場合、開発者はフィードバックを確認し、ローカル環境で問題を修正して再度 push する必要があります。
 
-### 2.5.5. ローカル検証の再推奨 <a id="re-recommendation-of-local-validation"></a>
+#### 2.5.5. ローカル検証の再推奨 {#h4-ci-re-recommend-local-validation}
 
-CI はプロジェクト全体の品質を担保する重要なプロセスですが、CI で初めてエラーを発見することは、開発サイクル全体を遅延させる可能性があります。**CI でのエラーは、修正・再プッシュ・再実行といった手戻りを発生させるため、[セクション 2.1](#why-is-local-validation-necessary) で述べたローカル検証が、CI 段階での手戻りを未然に防ぐ上で極めて重要です。特に、[セクション 2.1.3](#dx-gap-completion) や [セクション 2.3.1.2](#limitations-custom-rules-not-supported-etc) で述べたように、VSCode などのエディタ拡張機能だけでは検知できない Cairns 固有のカスタムルール違反や、高度なスキーマ機能に関するエラーも存在するため、ローカル検証スクリプトの実行が不可欠となります。**
+CI はプロジェクト全体の品質を担保する重要なプロセスですが、CI で初めてエラーを発見することは、開発サイクル全体を遅延させる可能性があります。**CI でのエラーは、修正・再プッシュ・再実行といった手戻りを発生させるため、[セクション 2.1](#h3-why-local-validation-is-needed) で述べたローカル検証が、CI 段階での手戻りを未然に防ぐ上で極めて重要です。特に、[セクション 2.1.3](#h4-complementing-dx-gap) や [セクション 2.3.1.2](#h4-basic-schema-validation-vscode) で述べたように、VSCode などのエディタ拡張機能だけでは検知できない Cairns 固有のカスタムルール違反や、高度なスキーマ機能に関するエラーも存在するため、ローカル検証スクリプトの実行が不可欠となります。**
 
 開発効率と生産性を最大限に高めるためには、CI に依存するのではなく、コードをコミットまたは push する前に、必ずローカル環境で検証を実行することを強く推奨します。
 
@@ -678,7 +678,6 @@ CI はプロジェクト全体の品質を担保する重要なプロセスで�
     # make validate
     ```
 
-[セクション 2.3.2](#recommended-complete-validation-via-custom-validation-script) で解説したカスタム検証スクリプトは、CI で実行される検証と**同等のチェック** (VSCode 拡張機能ではカバーしきれないチェックを含む) をローカルで実行できるように設計されています。ローカル検証を習慣づけることで、CI でのエラーを未然に防ぎ、よりスムーズで快適な開発プロセスを実現できます。**CI でのエラー修正にかかる時間を削減するためにも、ローカルでの事前検証を積極的に活用しましょう。**
+[セクション 2.3.2](#h4-recommended-full-validation-script) で解説したカスタム検証スクリプトは、CI で実行される検証と**同等のチェック** (VSCode 拡張機能ではカバーしきれないチェックを含む) をローカルで実行できるように設計されています。ローカル検証を習慣づけることで、CI でのエラーを未然に防ぎ、よりスムーズで快適な開発プロセスを実現できます。**CI でのエラー修正にかかる時間を削減するためにも、ローカルでの事前検証を積極的に活用しましょう。**
 
 -----
-
