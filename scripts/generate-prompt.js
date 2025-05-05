@@ -16,6 +16,9 @@ import yaml from 'js-yaml'; // Import js-yaml
 import { Buffer } from 'buffer'; // Import Buffer for byte operations
 import { readCached } from '../utils/fsCache.js'; // Import readCached
 
+// 正規表現をモジュールスコープに移動
+const HEADING_ID_REGEX = /\s*\{\s*#[^}]+\s*\}\s*$/;
+
 /**
  * エラーメッセージをフォーマットするヘルパー関数
  */
@@ -49,9 +52,8 @@ export function extractHeadings(content, sourceName = 'unknown') {
             });
 
             let titleWithoutId = titleFromAst;
-            // 正規表現を修正: 行末までを明示
-            const idRegex = /\s*\{\s*#[^}]+\s*\}\s*$/;
-            const idMatch = titleWithoutId.match(idRegex);
+            // モジュールスコープの正規表現定数を使用
+            const idMatch = titleWithoutId.match(HEADING_ID_REGEX);
             if (idMatch && idMatch.index !== undefined) { // index が存在することを確認
                 // substring を使用してID部分を除去
                 titleWithoutId = titleWithoutId.substring(0, idMatch.index);
