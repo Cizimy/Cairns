@@ -23,7 +23,7 @@ jest.mock('./generate-prompt.js', () => {
 // --- モック設定後にテスト対象をインポート ---
 const {
   formatError,
-  readFileContent,
+  // readFileContent, // 使用しなくなったためコメントアウト or 削除
   extractHeadings,
   determineNextScope,
   replacePlaceholders,
@@ -53,7 +53,8 @@ beforeEach(() => {
   mockProcessExit = jest.spyOn(process, 'exit').mockImplementation((code) => {
     throw new Error(`process.exit called with code ${code}`);
   });
-  mockReadFile.mockResolvedValue('');
+  // readCached を使うようになったので、readFile のモックは fsCache.test.js で管理
+  // mockReadFile.mockResolvedValue('');
   mockRunCli.mockResolvedValue(undefined);
   mockParseArguments.mockResolvedValue({ _: [], $0: 'generate-prompt.js' });
 });
@@ -81,7 +82,7 @@ describe('generate-prompt.js Script', () => {
       expect(formatError('Something went wrong', error))
         .toBe('Error: Something went wrong\nDetails: Error without stack');
     });
-test('should prioritize stderr for details', () => {
+    test('should prioritize stderr for details', () => {
       const error = {
         stderr: 'stderr output',
         stdout: 'stdout output',
@@ -108,12 +109,30 @@ test('should prioritize stderr for details', () => {
       expect(formatError('Command failed', error))
         .toBe('Error: Command failed\nDetails: Error message\nStack: Error stack');
     });
-  });
 
-  // Skip readFileContent tests
-  describe.skip('readFileContent', () => {
-    // ... tests ...
-  });
+    // スナップショットテストを追加 (正しい位置に修正)
+    test('should match snapshot for various error types', () => {
+      const simpleError = new Error('Simple message');
+      delete simpleError.stack;
+
+      const errorWithStack = new Error('Error with stack');
+      errorWithStack.stack = 'Error: Error with stack\n    at func (file.js:1:1)';
+
+      const errorWithStderr = { stderr: 'stderr output', stack: 'Error stack' };
+      const errorWithStdout = { stdout: 'stdout output', message: 'msg' }; // stack なし
+      const plainObjectError = { custom: 'data' };
+
+      expect(formatError('Basic Error', simpleError)).toMatchSnapshot('simple error');
+      expect(formatError('Error With Stack', errorWithStack)).toMatchSnapshot('error with stack');
+      expect(formatError('Error With Stderr', errorWithStderr)).toMatchSnapshot('error with stderr');
+      expect(formatError('Error With Stdout', errorWithStdout)).toMatchSnapshot('error with stdout');
+      expect(formatError('Plain Object Error', plainObjectError)).toMatchSnapshot('plain object error');
+      expect(formatError('Message Only', null)).toMatchSnapshot('message only'); // error が null の場合
+    });
+  }); // describe('formatError') の終了
+
+  // Skip readFileContent tests (削除されたため不要)
+  // describe.skip('readFileContent', () => { ... });
 
   describe('extractHeadings', () => {
     test('should extract headings with level and title (ID removed)', () => {
@@ -147,7 +166,10 @@ test('should prioritize stderr for details', () => {
      test('should handle markdown parsing errors gracefully', () => {
       const invalidMarkdown = '# Valid Heading {#id}\n```\nOops';
       const expected = [{ level: 1, title: 'Valid Heading' }];
+      // エラーが発生しても例外を投げずに結果を返すことだけを確認
+      expect(() => extractHeadings(invalidMarkdown, 'testSource')).not.toThrow();
       expect(extractHeadings(invalidMarkdown, 'testSource')).toEqual(expected);
+      // console.error の呼び出し確認は削除 (debug ログに移行したため)
      });
   });
 
@@ -182,7 +204,6 @@ title: Test Doc
 ## 2. 【最重要】ローカル検証ガイド (DX向上) {#h2-local-validation-guide} <###>
 ### 2.1. なぜローカル検証が必要か {#h3-why-local-validation-is-needed}
 `.trim();
-        // 修正: H3 と granularity タグを含むように期待値を更新
         const expectedDocumentStructure = `
 # Front Matter 記述ガイドライン {#h1-front-matter-guidelines}
 ## 1. はじめに {#h2-introduction} <##>
@@ -244,7 +265,6 @@ title: Granularity Test
 ---
 # Front Matter 記述ガイドライン {#h1-front-matter-guidelines}
 `.trim();
-        // 修正: granularity: 2 を考慮し、H2 とその子 (H3) を含むように期待値を更新 (元に戻す)
         const expectedScope = `
 ## 1. はじめに {#h2-introduction} <##>
 ### 1.1. このガイドラインの目的と対象読者 {#h3-purpose-and-audience}
