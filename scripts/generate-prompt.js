@@ -20,15 +20,19 @@ import { readCached } from '../utils/fsCache.js'; // Import readCached
 const HEADING_ID_REGEX = /\s*\{\s*#[^}]+\s*\}\s*$/;
 
 /**
- * エラーメッセージをフォーマットするヘルパー関数
+ * エラーメッセージをフォーマットするヘルパー関数 (分割代入を使用)
  */
 export function formatError(message, error) {
   let formattedMessage = `Error: ${message}`;
   if (error) {
-    const errorDetails = error.stderr || error.stdout || error.message || String(error);
+    // 分割代入でプロパティを取得し、デフォルト値を設定
+    const { stderr = '', stdout = '', message: errorMessage = '', stack = '' } = error;
+    // 詳細情報の優先順位: stderr > stdout > errorMessage > String(error)
+    const errorDetails = stderr || stdout || errorMessage || String(error);
     formattedMessage += `\nDetails: ${errorDetails}`;
-    if (error.stack) {
-        formattedMessage += `\nStack: ${error.stack}`;
+    // stack が存在する場合のみ追加
+    if (stack) {
+        formattedMessage += `\nStack: ${stack}`;
     }
   }
   return formattedMessage;

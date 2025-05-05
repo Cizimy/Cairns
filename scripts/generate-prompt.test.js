@@ -81,6 +81,33 @@ describe('generate-prompt.js Script', () => {
       expect(formatError('Something went wrong', error))
         .toBe('Error: Something went wrong\nDetails: Error without stack');
     });
+test('should prioritize stderr for details', () => {
+      const error = {
+        stderr: 'stderr output',
+        stdout: 'stdout output',
+        message: 'Error message',
+        stack: 'Error stack'
+      };
+      expect(formatError('Command failed', error))
+        .toBe('Error: Command failed\nDetails: stderr output\nStack: Error stack');
+    });
+    test('should use stdout if stderr is missing', () => {
+      const error = {
+        stdout: 'stdout output',
+        message: 'Error message',
+        stack: 'Error stack'
+      };
+      expect(formatError('Command failed', error))
+        .toBe('Error: Command failed\nDetails: stdout output\nStack: Error stack');
+    });
+    test('should use message if stderr and stdout are missing', () => {
+      const error = {
+        message: 'Error message',
+        stack: 'Error stack'
+      };
+      expect(formatError('Command failed', error))
+        .toBe('Error: Command failed\nDetails: Error message\nStack: Error stack');
+    });
   });
 
   // Skip readFileContent tests
