@@ -15,6 +15,14 @@ import { fileURLToPath } from 'url';
 import yaml from 'js-yaml'; // Import js-yaml
 import { Buffer } from 'buffer'; // Import Buffer for byte operations
 import { readCached } from '../utils/fsCache.js'; // Import readCached
+import debug from 'debug'; // Import debug
+
+// デバッガーインスタンスを作成
+const log = debug('generate-prompt');
+const logScope = debug('generate-prompt:scope');
+const logRepomix = debug('generate-prompt:repomix');
+const logMain = debug('generate-prompt:main');
+const logError = debug('generate-prompt:error'); // エラー詳細用
 
 // 正規表現をモジュールスコープに移動
 const HEADING_ID_REGEX = /\s*\{\s*#[^}]+\s*\}\s*$/;
@@ -44,7 +52,11 @@ export function formatError(message, error) {
  * Markdownコンテンツから見出しのリストを抽出する (比較用情報を含む)
  */
 export function extractHeadings(content, sourceName = 'unknown') {
-    if (!content) return [];
+    log('Extracting headings from source: %s', sourceName);
+    if (!content) {
+        log('Content is empty or null, returning empty array.');
+        return [];
+    }
     try {
         const tree = remark().use(remarkParse).parse(content);
         const headings = [];
@@ -62,12 +74,17 @@ export function extractHeadings(content, sourceName = 'unknown') {
                 // substring を使用してID部分を除去
                 titleWithoutId = titleWithoutId.substring(0, idMatch.index);
             }
+            const normalizedTitle = titleWithoutId.replace(/\s+/g, ' ').trim();
+            log('Extracted heading: level=%d, title="%s"', node.depth, normalizedTitle);
             // 抽出した見出しを配列に追加 (YAML側と同じ正規化を追加)
-            headings.push({ level: node.depth, title: titleWithoutId.replace(/\s+/g, ' ').trim() });
+            headings.push({ level: node.depth, title: normalizedTitle });
         }); // visit コールバック終了
+        log('Finished extracting headings. Count: %d', headings.length);
         return headings;
     } catch (error) {
+        // ここはユーザーに見せるべきエラーの可能性があるので console.error のまま
         console.error(formatError(`Failed to extract headings from ${sourceName}`, error));
+        logError('Error during heading extraction from %s: %O', sourceName, error); // debugログにも詳細を残す
         return []; // エラー時は空配列を返す
     }
 } // extractHeadings 関数の終了
@@ -156,38 +173,21 @@ function reconstructYamlStructure(section, remainingDepth, singleBranch = false)
 }
 
 
-// --- DEBUG HELPER ---
-function logWithBytes(label, str) {
-    if (typeof str !== 'string') {
-        console.log(`DEBUG: ${label}: Not a string (${typeof str})`);
-        return;
-    }
-    const buffer = Buffer.from(str, 'utf-8'); // UTF-8としてバイト列取得
-    console.log(`DEBUG: ${label}: "${str}" (Bytes: ${buffer.toString('hex')})`);
-}
+// --- DEBUG HELPER --- 削除
+// function logWithBytes(label, str) { ... }
 // --- END DEBUG HELPER ---
 
 /**
  * YAMLデータとtargetDocContentを比較し、次に執筆すべき範囲などを決定する (YAML版)
  */
 export function determineNextScope(sectionListYamlData, targetDocContent) {
+    logScope('Determining next scope...');
     const targetBodyContent = grayMatter(targetDocContent || '').content;
-    const targetDocHeadings = extractHeadings(targetBodyContent, 'targetDoc'); // AST + 文字列操作でID除去されたタイトルを取得
+    const targetDocHeadings = extractHeadings(targetBodyContent, 'targetDoc'); // extractHeadings 内でログ出力される
 
-    // --- DEBUG START ---
-    console.log('\n--- Debugging determineNextScope ---');
-    if (targetDocHeadings.length > 0) {
-        const firstMdHeading = targetDocHeadings[0];
-        logWithBytes('First MD Heading Title (Extracted)', firstMdHeading.title);
-        const firstMdKey = `${firstMdHeading.level}-${firstMdHeading.title}`;
-        logWithBytes('First MD Heading Key (Constructed)', firstMdKey);
-    } else {
-        console.log('DEBUG: No headings extracted from Markdown.');
-    }
+    logScope('Target document headings extracted. Count: %d', targetDocHeadings.length);
     const targetHeadingsSet = new Set(targetDocHeadings.map(h => `${h.level}-${h.title}`));
-    console.log('DEBUG: targetHeadingsSet Keys (first 5):', [...targetHeadingsSet].slice(0, 5));
-    console.log('--- End Debugging determineNextScope ---\n');
-    // --- DEBUG END ---
+    logScope('Target headings set created. Size: %d. First 5 keys: %o', targetHeadingsSet.size, [...targetHeadingsSet].slice(0, 5));
 
 
     let nextSectionData = null;
@@ -201,53 +201,41 @@ export function determineNextScope(sectionListYamlData, targetDocContent) {
         currentParentH2 = null,
         allowedDepth = Infinity   // 残り許容深さ
     ) {
-        if (nextSectionData) return;
-        if (allowedDepth <= 0) return; // 深さ制限ガード
+        logScope('Recursive search: allowedDepth=%d, currentParentH1=%s, currentParentH2=%s',
+                 allowedDepth, currentParentH1?.title, currentParentH2?.title);
+        if (nextSectionData) {
+            logScope('Next section already found, skipping further search.');
+            return;
+        }
+        if (allowedDepth <= 0) {
+            logScope('Reached allowed depth limit, stopping search in this branch.');
+            return; // 深さ制限ガード
+        }
 
         for (const section of sections) {
-            // --- DEBUG START ---
-            if (section.level === 1) { // 最初のセクションのみ詳細ログ
-                console.log('\n--- Debugging First YAML Section Comparison ---');
-                logWithBytes('YAML Original Title', section.title);
-                const normalizedYamlTitleDebug = section.title.replace(/\s+/g, ' ').trim();
-                logWithBytes('YAML Normalized Title', normalizedYamlTitleDebug);
-                const comparableTextDebug = `${section.level}-${normalizedYamlTitleDebug}`;
-                logWithBytes('YAML Comparable Key', comparableTextDebug);
-
-                // Markdown側の最初のキーと比較
-                if (targetDocHeadings.length > 0) {
-                     const firstMdKeyDebug = `${targetDocHeadings[0].level}-${targetDocHeadings[0].title}`;
-                     logWithBytes('Comparing with MD Key', firstMdKeyDebug);
-                     console.log(`DEBUG: Keys Equal? ${comparableTextDebug === firstMdKeyDebug}`);
-                }
-                console.log('DEBUG: targetHeadingsSet.has(YAML Key)?', targetHeadingsSet.has(comparableTextDebug));
-                console.log('--- End Debugging First YAML Section Comparison ---\n');
-            }
-            // --- DEBUG END ---
+            logScope('Checking section: level=%d, title="%s"', section.level, section.title);
 
             /* ① YAML ⇔ Target Doc 見出し比較 */
             const normalizedYamlTitle = section.title.replace(/\s+/g, ' ').trim();
             const comparableText = `${section.level}-${normalizedYamlTitle}`;
             const existsInTarget = targetHeadingsSet.has(comparableText);
-
-            // --- DEBUG START ---
-            if (section.level === 1) { // 比較結果もログ
-                console.log(`DEBUG: existsInTarget for level 1 section: ${existsInTarget}`);
-            }
-            // --- DEBUG END ---
+            logScope('Comparable key: "%s", Exists in target? %s', comparableText, existsInTarget);
 
 
             /* ② 親がすでに存在し、granularity が指定されている場合は枝完了 */
             if (existsInTarget && section.granularity !== undefined) {
+                logScope('Section exists and has granularity (%d), skipping children.', section.granularity);
                 continue; // 子は探索しない
             }
 
             /* ③ 未執筆のセクションを発見 */
             if (!existsInTarget) {
+                logScope('Found next section: level=%d, title="%s"', section.level, section.title);
                 nextSectionData = section;
                 // 親データの設定はここで確定
                 parentH1Data = section.level === 1 ? section : currentParentH1;
                 parentH2Data = section.level === 2 ? section : currentParentH2;
+                logScope('Set parent data: H1=%s, H2=%s', parentH1Data?.title, parentH2Data?.title);
                 return; // 発見したら即座に探索終了
             }
 
@@ -258,28 +246,40 @@ export function determineNextScope(sectionListYamlData, targetDocContent) {
             if (section.children && section.children.length > 0) {
                 // 子側の残り許容深さを計算 (nullish coalescing を使用)
                 const childAllowedDepth = section.granularity ?? (allowedDepth - 1);
+                logScope('Section has children. Calculated childAllowedDepth: %d', childAllowedDepth);
 
                 // 子探索可否を “子側” の残り許容深さで判定
                 if (childAllowedDepth > 1) {
+                    logScope('Descending into children...');
                     findNextSectionRecursive(
                         section.children,
                         nextParentH1,
                         nextParentH2,
                         childAllowedDepth
                     );
-                    if (nextSectionData) return; // 子要素で見つかったら抜ける
+                    if (nextSectionData) {
+                        logScope('Next section found in children, returning.');
+                        return; // 子要素で見つかったら抜ける
+                    }
+                    logScope('Finished searching children of "%s".', section.title);
+                } else {
+                    logScope('Skipping children search due to childAllowedDepth <= 1.');
                 }
+            } else {
+                 logScope('Section has no children.');
             }
         }
     }
 
     if (sectionListYamlData && sectionListYamlData.sections) {
-        // 最初の呼び出しで allowedDepth に Infinity を渡す
+        logScope('Starting recursive search from root sections.');
         findNextSectionRecursive(sectionListYamlData.sections, null, null, Infinity);
     }
 
     if (!nextSectionData) {
+        // ここはユーザーへの警告なので console.warn のまま
         console.warn('No next section found in YAML data. Assuming completion or error.');
+        logScope('No next section identified after full search.'); // debugログにも残す
         return {
             currentScope: "<!-- No next section identified from YAML -->",
             sectionStructure: "<!-- Could not determine section structure from YAML -->",
@@ -288,11 +288,13 @@ export function determineNextScope(sectionListYamlData, targetDocContent) {
         };
     }
 
+    logScope('Next section determined: %s', nextSectionData.title);
     // --- granularity と currentScope のロジック修正 ---
     // granularity に基づいて再構築する深さを決定
     const remainingDepthForScope = (nextSectionData.granularity && nextSectionData.granularity > 0)
         ? nextSectionData.granularity
         : 6; // デフォルトの残り深さ
+    logScope('Calculating remaining depth for currentScope: %d', remainingDepthForScope);
 
     // reconstructMarkdownFromYaml を呼び出し、結果を Markdown 文字列に変換
     const currentScope = reconstructMarkdownFromYaml(
@@ -300,12 +302,15 @@ export function determineNextScope(sectionListYamlData, targetDocContent) {
         remainingDepthForScope,
         /* singleBranch = */ Boolean(nextSectionData.granularity) // granularity があれば true
     ).trim();
+    logScope('Reconstructed currentScope (first 100 chars): %s', currentScope.substring(0, 100));
 
 
     // sectionStructure: 親(H2)とその子要素全体を再構築。H2親がなければH1親(or自身)を使う
     // こちらは granularity によらず常に全階層 (深さ6) を表示 (singleBranch=false)
     const sectionToReconstructForStructure = parentH2Data || parentH1Data || nextSectionData;
+    logScope('Determined section for sectionStructure: %s', sectionToReconstructForStructure.title);
     const sectionStructure = reconstructMarkdownFromYaml(sectionToReconstructForStructure, 6, false).trim();
+    logScope('Reconstructed sectionStructure (first 100 chars): %s', sectionStructure.substring(0, 100));
 
 
     // documentStructure: H1, H2, H3レベルの構造を再構築 (Markdown版)
@@ -331,9 +336,11 @@ export function determineNextScope(sectionListYamlData, targetDocContent) {
     }
 
     if (sectionListYamlData && sectionListYamlData.sections) {
+        logScope('Building document structure (H1-H3)...');
         buildDocStructureRecursive(sectionListYamlData.sections);
     }
     documentStructure = documentStructure.trim(); // 末尾の改行を削除
+    logScope('Reconstructed documentStructure (first 100 chars): %s', documentStructure.substring(0, 100));
 
 
     return {
@@ -347,6 +354,7 @@ export function determineNextScope(sectionListYamlData, targetDocContent) {
 
 /** テンプレート内のプレースホルダー置換 */
 export function replacePlaceholders(templateContent, data) {
+    log('Replacing placeholders in template...');
     let result = templateContent;
     result = result.replace(/\{\{\s*TARGET_DOC_PATH\s*\}\}/g, () => data.targetDocPath || '');
     result = result.replace(/\{\{\s*SUB_TASK\s*\}\}/g, () => data.subTask || '');
@@ -360,19 +368,26 @@ export function replacePlaceholders(templateContent, data) {
     result = result.replace(/\{\{\s*CURRENT_SCOPE\s*\}\}/g, () => data.currentScope || '');
     result = result.replace(/\{\{\s*SECTION_STRUCTURE\s*\}\}/g, () => data.sectionStructure || '');
     result = result.replace(/\{\{\s*DOC_STRUCTURE\s*\}\}/g, () => data.documentStructure || '');
+    log('Placeholders replaced.');
     return result;
 }
 
 /** repomix 実行 */
 async function runRepomix() {
+  // ユーザー向けの情報なので console.log のまま
   console.log(`🔄 Running repomix via library using root config to update repomix-output.md...`);
+  logRepomix('Executing repomix CLI via library...');
   try {
-    await runCli(['.'], process.cwd(), { quiet: false });
+    await runCli(['.'], process.cwd(), { quiet: false }); // quiet: false で repomix 自身のログは表示させる
+    // ユーザー向けの情報なので console.log のまま
     console.log(`✅ repomix command finished running via library.`);
     console.log(`   Output should be saved based on root repomix.config.json settings.`);
+    logRepomix('repomix CLI execution successful.');
   } catch (error) {
+    // ユーザー向けのエラーなので console.error/warn のまま
     console.error(formatError('Failed to execute repomix via library', error));
     console.warn('Continuing prompt generation despite repomix execution error.');
+    logError('repomix CLI execution failed: %O', error); // debugログにも詳細を残す
   }
 }
 
@@ -380,12 +395,15 @@ async function runRepomix() {
  * コマンドライン引数を解析する関数
  */
 export async function parseArguments() {
-    return yargs(hideBin(process.argv))
+    logMain('Parsing command line arguments...');
+    const args = await yargs(hideBin(process.argv))
         .usage('Usage: $0 --target-doc <path> --prompt-type <type> --output <path>')
         .option('target-doc', { alias: 't', description: '執筆対象のドキュメントファイルパス', type: 'string', demandOption: true })
         .option('prompt-type', { alias: 'p', description: '生成するプロンプトの種類', type: 'string', choices: ['writer', 'plot-reviewer', 'draft-reviewer', 'rewriter'], demandOption: true })
         .option('output', { alias: 'o', description: '生成されたプロンプトの出力先ファイルパス', type: 'string', demandOption: true })
         .help().alias('help', 'h').strict().argv;
+    logMain('Arguments parsed: %o', args);
+    return args;
 }
 
 
@@ -393,11 +411,14 @@ export async function parseArguments() {
  * メイン処理 (引数解析関数を引数として受け取る)
  */
 export async function main(argParser = parseArguments) {
+  logMain('Starting main execution...');
   let argv;
   try {
       argv = await argParser();
   } catch (error) {
+      // ユーザー向けのエラーなので console.error のまま
       console.error(formatError('Argument parsing failed', error));
+      logError('Argument parsing failed: %O', error); // debugログにも詳細を残す
       process.exit(1);
   }
 
@@ -416,6 +437,7 @@ export async function main(argParser = parseArguments) {
     const draftPath = (argv.promptType === 'draft-reviewer' || argv.promptType === 'rewriter') ? path.join('temp-documentation-support', 'draft.md') : null;
     const reviewPath = argv.promptType === 'rewriter' ? path.join('temp-documentation-support', 'review.md') : null;
 
+    logMain('Reading required files in parallel...');
     // ファイル読み込みを並列化
     const [
         templateContent,
@@ -435,42 +457,55 @@ export async function main(argParser = parseArguments) {
         readCached(sectionListYamlPath),
         readCached(repomixOutputPath).catch(err => { // Handle optional file error
             if (err.code === 'ENOENT') {
+                // ユーザー向けの警告なので console.warn のまま
                 console.warn(`Optional file not found: ${repomixOutputPath}. Skipping.`);
+                logMain('Optional file %s not found, resolving null.', repomixOutputPath); // debugログ
                 return null; // Return null if not found
             }
+            logError('Error reading optional file %s: %O', repomixOutputPath, err); // debugログ
             throw err; // Re-throw other errors
         }),
         plotPath ? readCached(plotPath) : Promise.resolve(null), // Read conditionally or resolve null
         draftPath ? readCached(draftPath) : Promise.resolve(null), // Read conditionally or resolve null
         reviewPath ? readCached(reviewPath) : Promise.resolve(null)  // Read conditionally or resolve null
     ]);
+    logMain('All required files read.');
 
     // sectionListYamlContent のパース (エラーハンドリング強化)
     let sectionListYamlData = null;
     if (sectionListYamlContent) {
+        logMain('Parsing section list YAML...');
         try {
             sectionListYamlData = yaml.load(sectionListYamlContent);
             if (!sectionListYamlData || typeof sectionListYamlData !== 'object' || !Array.isArray(sectionListYamlData.sections)) {
                 // より具体的な構造チェック
                 throw new Error('Invalid YAML structure: Root should be an object with a "sections" array.');
             }
+            logMain('Section list YAML parsed successfully.');
         } catch (e) {
+            // ユーザー向けのエラーなので console.error のまま
             console.error(formatError(`Failed to parse ${sectionListYamlPath}`, e));
+            logError('Failed to parse YAML file %s: %O', sectionListYamlPath, e); // debugログ
             process.exit(1);
         }
     } else {
         // sectionListYamlContent が null または空の場合のエラー処理
+        // ユーザー向けのエラーなので console.error のまま
         console.error(`Error: ${sectionListYamlPath} not found or empty.`);
+        logError('Section list YAML file %s not found or empty.', sectionListYamlPath); // debugログ
         process.exit(1);
     }
 
     const { currentScope, sectionStructure, documentStructure, sectionListRaw } = determineNextScope(sectionListYamlData, targetDocContent);
 
     if (currentScope === "<!-- No next section identified from YAML -->") {
+        // ユーザー向けの情報なので console.log のまま
         console.log("Skipping prompt generation because no next section was identified from YAML.");
+        logMain('No next section identified, skipping prompt generation.'); // debugログ
         return;
     }
 
+    logMain('Generating prompt content...');
     const generatedPrompt = replacePlaceholders(templateContent, {
       targetDocPath: argv.targetDoc, subTask: subTaskContent, microTask: microTaskContent, repomix: repomixContent,
       plot: plotContent, draft: draftContent, review: reviewContent, targetDoc: targetDocContent,
@@ -479,20 +514,27 @@ export async function main(argParser = parseArguments) {
       documentStructure: documentStructure, // Markdown string
       // sectionListRaw: sectionListRaw, // This is already a YAML string
     });
+    logMain('Prompt content generated.');
 
     const outputFilePath = path.resolve(argv.output);
+    logMain('Writing generated prompt to: %s', outputFilePath);
     await writeFile(outputFilePath, generatedPrompt, 'utf-8');
+    // ユーザー向けの成功メッセージなので console.log のまま
     console.log(`✅ Prompt successfully generated and saved to: ${outputFilePath}`);
+    logMain('Main execution completed successfully.');
 
   } catch (error) {
     // Promise.all やその他の非同期処理からのエラーをキャッチ
+    // ユーザー向けのエラーなので console.error のまま
     console.error(formatError('Failed to generate prompt', error));
+    logError('Unhandled error during main execution: %O', error); // debugログ
     process.exit(1);
   }
 }
 
 // Check if the script is being run directly using import.meta.url
 const isMainScript = process.argv[1] === fileURLToPath(import.meta.url);
+logMain('Is main script? %s', isMainScript);
 
 if (isMainScript) {
   main();
