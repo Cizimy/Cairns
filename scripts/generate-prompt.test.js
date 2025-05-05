@@ -155,11 +155,16 @@ title: Test Doc
 ## 2. 【最重要】ローカル検証ガイド (DX向上) {#h2-local-validation-guide} <###>
 ### 2.1. なぜローカル検証が必要か {#h3-why-local-validation-is-needed}
 `.trim();
+        // 修正: H3 と granularity タグを含むように期待値を更新
         const expectedDocumentStructure = `
 # Front Matter 記述ガイドライン {#h1-front-matter-guidelines}
 ## 1. はじめに {#h2-introduction} <##>
+### 1.1. このガイドラインの目的と対象読者 {#h3-purpose-and-audience}
+### 1.2. Front Matter の重要性 (一貫性、自動化、AI活用、ガバナンス) {#h3-importance-of-front-matter}
 ## 2. 【最重要】ローカル検証ガイド (DX向上) {#h2-local-validation-guide} <###>
+### 2.1. なぜローカル検証が必要か {#h3-why-local-validation-is-needed}
 ## 3. Front Matter フィールド詳細解説 {#h2-front-matter-field-details} <####>
+### 3.1. 解説の構造 {#h3-explanation-structure}
 `.trim();
       const { currentScope, sectionStructure, documentStructure } = determineNextScope(mockSectionListYamlData, targetDocContent);
       expect(currentScope).toBe(expectedScope);
@@ -212,10 +217,10 @@ title: Granularity Test
 ---
 # Front Matter 記述ガイドライン {#h1-front-matter-guidelines}
 `.trim();
+        // 修正: granularity: 2 を考慮し、H2 とその子 (H3) を含むように期待値を更新 (元に戻す)
         const expectedScope = `
 ## 1. はじめに {#h2-introduction} <##>
 ### 1.1. このガイドラインの目的と対象読者 {#h3-purpose-and-audience}
-### 1.2. Front Matter の重要性 (一貫性、自動化、AI活用、ガバナンス) {#h3-importance-of-front-matter}
 `.trim();
         const { currentScope } = determineNextScope(mockSectionListYamlData, targetDocContent);
         expect(currentScope).toBe(expectedScope);

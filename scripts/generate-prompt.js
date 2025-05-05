@@ -13,6 +13,7 @@ import grayMatter from 'gray-matter';
 import { runCli } from 'repomix';
 import { fileURLToPath } from 'url';
 import yaml from 'js-yaml'; // Import js-yaml
+import { Buffer } from 'buffer'; // Import Buffer for byte operations
 
 /**
  * エラーメッセージをフォーマットするヘルパー関数
@@ -86,9 +87,10 @@ export function extractHeadings(content, sourceName = 'unknown') {
  * YAMLデータから指定されたセクションとその子要素をMarkdown形式で再構築するヘルパー関数
  * @param {object} section - 再構築するセクションオブジェクト
  * @param {number} remainingDepth - 再構築する残りの深さ
+ * @param {boolean} [singleBranch=false] - trueの場合、各階層で最初の子要素のみを辿る
  * @returns {string} 再構築されたMarkdown文字列
  */
-function reconstructMarkdownFromYaml(section, remainingDepth) {
+function reconstructMarkdownFromYaml(section, remainingDepth, singleBranch = false) {
     // remainingDepth が 0 以下、または section が null なら再構築しない
     if (!section || remainingDepth <= 0) {
         return '';
@@ -111,14 +113,70 @@ function reconstructMarkdownFromYaml(section, remainingDepth) {
 
     // 子要素の再構築は remainingDepth が 1 より大きい場合のみ行う
     if (remainingDepth > 1 && section.children && section.children.length > 0) {
-        section.children.forEach(child => {
+        // singleBranch=true のときは **最初の子だけ** たどる
+        const iterable = singleBranch ? [section.children[0]] : section.children;
+        for (const child of iterable) {
             // 再帰呼び出し時に remainingDepth をデクリメント
-            markdown += reconstructMarkdownFromYaml(child, remainingDepth - 1);
-        });
+            // singleBranch フラグはそのまま子に引き継ぐ
+            markdown += reconstructMarkdownFromYaml(child, remainingDepth - 1, singleBranch);
+            if (singleBranch) break; // 幅を 1 に固定 (最初の要素のみ処理したら抜ける)
+        }
     }
     return markdown;
 }
 
+/**
+ * YAMLデータから指定されたセクションとその子要素をYAML構造のJSオブジェクトとして再構築するヘルパー関数
+ * @param {object} section - 再構築するセクションオブジェクト
+ * @param {number} remainingDepth - 再構築する残りの深さ
+ * @param {boolean} [singleBranch=false] - trueの場合、各階層で最初の子要素のみを辿る
+ * @returns {object|null} 再構築されたセクション構造を表すJSオブジェクト、または無効な場合はnull
+ */
+function reconstructYamlStructure(section, remainingDepth, singleBranch = false) {
+    if (!section || remainingDepth <= 0) {
+        return null;
+    }
+
+    const node = {
+        level: section.level,
+        title: section.title,
+    };
+    if (section.id) node.id = section.id;
+    // granularity は YAML 構造には含めない
+    if (section.list_items && section.list_items.length > 0) {
+        node.list_items = section.list_items;
+    }
+
+    if (remainingDepth > 1 && section.children && section.children.length > 0) {
+        const children = [];
+        const iterable = singleBranch ? [section.children[0]] : section.children;
+        for (const child of iterable) {
+            // 再帰呼び出し時に remainingDepth をデクリメント
+            // singleBranch フラグはそのまま子に引き継ぐ
+            const childNode = reconstructYamlStructure(child, remainingDepth - 1, singleBranch);
+            if (childNode) { // null でない場合のみ追加
+                children.push(childNode);
+            }
+            if (singleBranch) break; // 幅を 1 に固定 (最初の要素のみ処理したら抜ける)
+        }
+        if (children.length > 0) {
+            node.children = children;
+        }
+    }
+    return node;
+}
+
+
+// --- DEBUG HELPER ---
+function logWithBytes(label, str) {
+    if (typeof str !== 'string') {
+        console.log(`DEBUG: ${label}: Not a string (${typeof str})`);
+        return;
+    }
+    const buffer = Buffer.from(str, 'utf-8'); // UTF-8としてバイト列取得
+    console.log(`DEBUG: ${label}: "${str}" (Bytes: ${buffer.toString('hex')})`);
+}
+// --- END DEBUG HELPER ---
 
 /**
  * YAMLデータとtargetDocContentを比較し、次に執筆すべき範囲などを決定する (YAML版)
@@ -127,7 +185,21 @@ export function determineNextScope(sectionListYamlData, targetDocContent) {
     const targetBodyContent = grayMatter(targetDocContent || '').content;
     const targetDocHeadings = extractHeadings(targetBodyContent, 'targetDoc'); // AST + 文字列操作でID除去されたタイトルを取得
 
+    // --- DEBUG START ---
+    console.log('\n--- Debugging determineNextScope ---');
+    if (targetDocHeadings.length > 0) {
+        const firstMdHeading = targetDocHeadings[0];
+        logWithBytes('First MD Heading Title (Extracted)', firstMdHeading.title);
+        const firstMdKey = `${firstMdHeading.level}-${firstMdHeading.title}`;
+        logWithBytes('First MD Heading Key (Constructed)', firstMdKey);
+    } else {
+        console.log('DEBUG: No headings extracted from Markdown.');
+    }
     const targetHeadingsSet = new Set(targetDocHeadings.map(h => `${h.level}-${h.title}`));
+    console.log('DEBUG: targetHeadingsSet Keys (first 5):', [...targetHeadingsSet].slice(0, 5));
+    console.log('--- End Debugging determineNextScope ---\n');
+    // --- DEBUG END ---
+
 
     let nextSectionData = null;
     let parentH1Data = null; // H1レベルの親を保持
@@ -144,10 +216,37 @@ export function determineNextScope(sectionListYamlData, targetDocContent) {
         if (allowedDepth <= 0) return; // 深さ制限ガード
 
         for (const section of sections) {
+            // --- DEBUG START ---
+            if (section.level === 1) { // 最初のセクションのみ詳細ログ
+                console.log('\n--- Debugging First YAML Section Comparison ---');
+                logWithBytes('YAML Original Title', section.title);
+                const normalizedYamlTitleDebug = section.title.replace(/\s+/g, ' ').trim();
+                logWithBytes('YAML Normalized Title', normalizedYamlTitleDebug);
+                const comparableTextDebug = `${section.level}-${normalizedYamlTitleDebug}`;
+                logWithBytes('YAML Comparable Key', comparableTextDebug);
+
+                // Markdown側の最初のキーと比較
+                if (targetDocHeadings.length > 0) {
+                     const firstMdKeyDebug = `${targetDocHeadings[0].level}-${targetDocHeadings[0].title}`;
+                     logWithBytes('Comparing with MD Key', firstMdKeyDebug);
+                     console.log(`DEBUG: Keys Equal? ${comparableTextDebug === firstMdKeyDebug}`);
+                }
+                console.log('DEBUG: targetHeadingsSet.has(YAML Key)?', targetHeadingsSet.has(comparableTextDebug));
+                console.log('--- End Debugging First YAML Section Comparison ---\n');
+            }
+            // --- DEBUG END ---
+
             /* ① YAML ⇔ Target Doc 見出し比較 */
             const normalizedYamlTitle = section.title.replace(/\s+/g, ' ').trim();
             const comparableText = `${section.level}-${normalizedYamlTitle}`;
             const existsInTarget = targetHeadingsSet.has(comparableText);
+
+            // --- DEBUG START ---
+            if (section.level === 1) { // 比較結果もログ
+                console.log(`DEBUG: existsInTarget for level 1 section: ${existsInTarget}`);
+            }
+            // --- DEBUG END ---
+
 
             /* ② 親がすでに存在し、granularity が指定されている場合は枝完了 */
             if (existsInTarget && section.granularity !== undefined) {
@@ -202,27 +301,37 @@ export function determineNextScope(sectionListYamlData, targetDocContent) {
 
     // --- granularity と currentScope のロジック修正 ---
     // granularity に基づいて再構築する深さを決定
-    // granularity が 1 なら nextSectionData のみ (深さ1)
-    // granularity が 2 なら nextSectionData とその子まで (深さ2)
-    // granularity が未指定 or 0 以下なら、従来の最大深度 (6) まで
     const remainingDepthForScope = (nextSectionData.granularity && nextSectionData.granularity > 0)
         ? nextSectionData.granularity
         : 6; // デフォルトの残り深さ
-    const currentScope = reconstructMarkdownFromYaml(nextSectionData, remainingDepthForScope).trim();
+
+    // reconstructMarkdownFromYaml を呼び出し、結果を Markdown 文字列に変換
+    const currentScope = reconstructMarkdownFromYaml(
+        nextSectionData,
+        remainingDepthForScope,
+        /* singleBranch = */ Boolean(nextSectionData.granularity) // granularity があれば true
+    ).trim();
+
 
     // sectionStructure: 親(H2)とその子要素全体を再構築。H2親がなければH1親(or自身)を使う
-    // こちらは granularity によらず常に全階層 (深さ6) を表示
+    // こちらは granularity によらず常に全階層 (深さ6) を表示 (singleBranch=false)
     const sectionToReconstructForStructure = parentH2Data || parentH1Data || nextSectionData;
-    const sectionStructure = reconstructMarkdownFromYaml(sectionToReconstructForStructure, 6).trim();
+    const sectionStructure = reconstructMarkdownFromYaml(sectionToReconstructForStructure, 6, false).trim();
 
-    // documentStructure: H1, H2, H3レベルの構造を再構築
+
+    // documentStructure: H1, H2, H3レベルの構造を再構築 (Markdown版)
     let documentStructure = '';
     function buildDocStructureRecursive(sections) {
+        if (!sections) return;
         for (const section of sections) {
             if (section.level <= 3) { // H3まで含める
                 documentStructure += `${'#'.repeat(section.level)} ${section.title}`;
                 if (section.id) documentStructure += ` {#${section.id}}`;
                 // granularity は documentStructure には不要なので除去
+                // granularity タグを追加
+                if (section.granularity) {
+                    documentStructure += ` <${'#'.repeat(section.granularity)}>`;
+                }
                 documentStructure += '\n';
                 // H1, H2の場合のみ子要素を再帰的に探索
                 if (section.level < 3 && section.children && section.children.length > 0) {
@@ -231,15 +340,18 @@ export function determineNextScope(sectionListYamlData, targetDocContent) {
             }
         }
     }
+
     if (sectionListYamlData && sectionListYamlData.sections) {
         buildDocStructureRecursive(sectionListYamlData.sections);
     }
+    documentStructure = documentStructure.trim(); // 末尾の改行を削除
+
 
     return {
-        currentScope, // granularity の解釈が反映されたはず
-        sectionStructure,
-        documentStructure: documentStructure.trim(),
-        sectionListRaw: yaml.dump(sectionListYamlData)
+        currentScope, // Markdown 文字列
+        sectionStructure, // Markdown 文字列
+        documentStructure, // Markdown 文字列
+        sectionListRaw: yaml.dump(sectionListYamlData) // これは元々 YAML 文字列
     };
 }
 
@@ -255,7 +367,7 @@ export function replacePlaceholders(templateContent, data) {
     result = result.replace(/\{\{\s*REVIEW_MD\s*\}\}/g, () => data.review ?? '');
     result = result.replace(/\{\{\s*REPOMIX_OUTPUT\s*\}\}/g, () => data.repomix ?? '<!-- repomix-output.md not found or empty -->');
     result = result.replace(/\{\{\s*TARGET_DOC_FULL\s*\}\}/g, () => data.targetDoc || '');
-    // TODO: currentScope と sectionStructure が YAML 文字列になるように修正 (これは YAML 文字列ではなく Markdown 文字列で正しいはずなので TODO 削除)
+    // currentScope, sectionStructure, documentStructure は Markdown 文字列として渡される
     result = result.replace(/\{\{\s*CURRENT_SCOPE\s*\}\}/g, () => data.currentScope || '');
     result = result.replace(/\{\{\s*SECTION_STRUCTURE\s*\}\}/g, () => data.sectionStructure || '');
     result = result.replace(/\{\{\s*DOC_STRUCTURE\s*\}\}/g, () => data.documentStructure || '');
@@ -311,7 +423,7 @@ export async function main(argParser = parseArguments) {
     const targetDocContent = await readFileContent(argv.targetDoc, 'Target Document');
 
     // TEMP: Test granularity
-    const sectionListYamlPath = path.join('temp-documentation-support', 'section-list-granularity-test.yaml');
+    const sectionListYamlPath = path.join('temp-documentation-support', 'section-list.yaml');
     const sectionListYamlContent = await readFileContent(sectionListYamlPath, 'Section List YAML');
     let sectionListYamlData = null;
     if (sectionListYamlContent) {
@@ -346,8 +458,10 @@ export async function main(argParser = parseArguments) {
     const generatedPrompt = replacePlaceholders(templateContent, {
       targetDocPath: argv.targetDoc, subTask: subTaskContent, microTask: microTaskContent, repomix: repomixContent,
       plot: plotContent, draft: draftContent, review: reviewContent, targetDoc: targetDocContent,
-      currentScope: currentScope, sectionStructure: sectionStructure, documentStructure: documentStructure,
-      // sectionListRaw: sectionListRaw,
+      currentScope: currentScope, // Markdown string
+      sectionStructure: sectionStructure, // Markdown string
+      documentStructure: documentStructure, // Markdown string
+      // sectionListRaw: sectionListRaw, // This is already a YAML string
     });
 
     const outputFilePath = path.resolve(argv.output);

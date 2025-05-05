@@ -1,10 +1,10 @@
-# Front Matter 記述ガイドライン {h1-front-matter-guidelines}
+# Front Matter 記述ガイドライン {#h1-front-matter-guidelines}
 
 ## 1. はじめに {#h2-introduction}
 
 ### 1.1. このガイドラインの目的と対象読者 {#h3-purpose-and-audience}
 
-#### 目的 {h4-purpose}
+#### 目的 {#h4-purpose}
 
 このガイドラインは、Cairns プロジェクトにおける Markdown ドキュメントの品質、一貫性、および自動処理（検証、インデックス作成、ガバナンス等）を担保するために、ドキュメントのメタデータである **Front Matter** の記述方法を標準化することを目的とします。
 
@@ -14,7 +14,7 @@
 * プロジェクト全体の目標である AI (RAG) 活用促進や開発者体験 (DX) 向上との整合性を確保し、将来のプロジェクト進化（LLM連携深化、ガバナンス強化）に対応できる記述基盤を確立します。
 * [`template.md`](templates/template.md) や VSCode 拡張機能だけではカバーしきれない詳細なルール、ベストプラクティス、各フィールドの意図、そして **ローカルでのカスタム検証の重要性** について解説します。
 
-#### 対象読者 {h4-audience}
+#### 対象読者 {#h4-audience}
 
 このガイドラインは、以下の方々を対象としています。
 
@@ -241,7 +241,7 @@ CI/CD パイプラインでのエラーを未然に防ぎ、開発効率を高�
 VSCode 拡張機能 ([`redhat.vscode-yaml`](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-yaml) など) を利用した、リアルタイムに近い基本的なスキーマ検証の方法とその限界について説明します。
 手軽に始められる一方、Cairns プロジェクトの全てのルールをカバーできない点に注意が必要です。
 
-##### 2.3.1.1. 簡単な使い方 {h5-simple-usage}
+##### 2.3.1.1. 簡単な使い方 {#h5-simple-usage}
 
 1.  **VSCode でファイルを開く:** YAML Front Matter を含む `.md` ファイルを VSCode で開きます。
 2.  **拡張機能の確認:**
@@ -266,7 +266,7 @@ VSCode 拡張機能 ([`redhat.vscode-yaml`](https://marketplace.visualstudio.com
     * 上記設定が正しければ、エディタがリアルタイムで基本的なスキーマ違反 (例: フィールドのデータ型間違い、必須フィールドの欠落、`enum` で定義されていない値の使用など) を検出し、問題箇所に波線などで表示します。
     * 問題箇所にマウスカーソルを合わせると、エラーの詳細メッセージが表示され、修正のヒントを得られます。
 
-##### 2.3.1.2. 限界 (カスタムルール非対応等) {h5-limitations-no-custom-rules}
+##### 2.3.1.2. 限界 (カスタムルール非対応等) {#h5-limitations-no-custom-rules}
 
 * **最重要:** この VSCode 拡張機能による検証は、あくまで**基本的なスキーマ構造のチェック**に限定されます。以下の Cairns プロジェクト固有のルールや整合性チェックは**行われません**。これらは後述する**カスタム検証スクリプトでのみ検証可能**です。
 
@@ -295,7 +295,7 @@ Cairns プロジェクトの **全ての** 検証ルール (JSON Schema の厳�
 セクション 2.1.3 で述べた VSCode 拡張機能の限界 (DX ギャップ) を完全に補完し、CI/CD パイプラインで実行される内容と同じレベルの検証をローカルで実行できます。これにより、プロジェクトの品質を確実に担保します。
 この検証は、セクション 2.2 でセットアップした環境で実行します。
 
-##### 2.3.2.1. 実行コマンド例 {h5-execution-command-examples}
+##### 2.3.2.1. 実行コマンド例 {#h5-execution-command-examples}
 
 * **実行場所:** プロジェクトのルートディレクトリで以下のコマンドを実行します。
 * **コマンド:** 以下のコマンドは通常、[`package.json`](../package.json) の `scripts` セクションで定義されています。
@@ -326,7 +326,7 @@ Cairns プロジェクトの **全ての** 検証ルール (JSON Schema の厳�
     * 検証に成功した場合 (エラーがない場合): コマンドは通常、成功を示す終了コード `0` で終了し、成功メッセージが表示されます。
     * 検証に失敗した場合 (エラーがある場合): 発見されたエラーの詳細メッセージがコンソールに出力され、コマンドは失敗を示す非ゼロの終了コード (例: `1`) で終了します。
 
-##### 2.3.2.2. コマンド内容の説明 {h5-command-description}
+##### 2.3.2.2. コマンド内容の説明 {#h5-command-description}
 
 上記の `npm run validate` (または同等のコマンド) は、内部でカスタム検証スクリプト (例: [`scripts/validate.js`](../scripts/validate.js) や [`scripts/validate_cairns_rules.js`](../scripts/validate_cairns_rules.js) など、実際のスクリプト名はプロジェクトの実装によります) を呼び出しています。このスクリプトは、以下のステップで検証を実行します。
 
@@ -362,7 +362,7 @@ Cairns プロジェクトの **全ての** 検証ルール (JSON Schema の厳�
 
 **注意:** VSCode 拡張機能 (`redhat.vscode-yaml` 等) でも、これらの基本的なスキーマ違反の一部はリアルタイムで検出される可能性があります。しかし、セクション 2.1.3 および 2.3.1.2 で述べた通り、拡張機能は JSON Schema Draft 2020-12 の高度な機能 (例: `$dynamicRef`) を完全にはサポートしていない可能性があり、またカスタムルールは一切検証できません。したがって、**カスタム検証スクリプトによるチェックが、スキーマ適合性を確認する最も信頼性の高い方法であり、コミット前には必須**となります。
 
-##### 2.4.1.1. 型間違い {h5-type-mismatch}
+##### 2.4.1.1. 型間違い {#h5-type-mismatch}
 
   * **典型的なエラーメッセージ:**
 
@@ -382,7 +382,7 @@ Cairns プロジェクトの **全ての** 検証ルール (JSON Schema の厳�
     2.  エラーメッセージ内の期待される型 (`Message: must be integer` など) や、`_dev_docs/front-matter-guidelines.md` のフィールド解説セクション、または [`schema/cairns-front-matter.schema.json`](../schema/cairns-front-matter.schema.json) (及び関連スキーマ) を参照し、該当フィールドに期待される正しいデータ型 (例: `integer`) を確認します。
     3.  値を正しいデータ型に修正します (例: `"90"` (文字列) を `90` (数値) に修正)。
 
-##### 2.4.1.2. パターン不一致 (`id` 等) {h5-pattern-mismatch-id}
+##### 2.4.1.2. パターン不一致 (`id` 等) {#h5-pattern-mismatch-id}
 
   * **典型的なエラーメッセージ:**
 
@@ -403,7 +403,7 @@ Cairns プロジェクトの **全ての** 検証ルール (JSON Schema の厳�
     2.  エラーメッセージ内の期待されるパターン (`Message: must match pattern "..."` など) や、`_dev_docs/front-matter-guidelines.md` のフィールド解説、[`schema/patterns.schema.json`](../schema/patterns.schema.json)、そして**最優先で [`naming-conventions.md`](naming-conventions.md) を参照**し、期待されるフォーマットを確認します。
     3.  値をパターンおよび**命名規則**に一致するように修正します (例: `id` を小文字とハイフンのみに修正: `'L2-Sample_Doc'` -> `'l2-sample-doc'`)。
 
-##### 2.4.1.3. 日時フォーマット (`last_updated` 等) {h5-datetime-format-last-updated}
+##### 2.4.1.3. 日時フォーマット (`last_updated` 等) {#h5-datetime-format-last-updated}
 
   * **典型的なエラーメッセージ:**
 
@@ -431,7 +431,7 @@ JSON Schema による基本的な構造チェックに加え、カスタム検�
 
 **注記:** ここに示すエラーメッセージ例 (`Error [Custom Rule]: ...`) は、カスタム検証スクリプトがより詳細な情報を提供するために整形したものです。実際の出力はスクリプトの実装によって若干異なる場合があります。
 
-##### 2.4.2.1. ID 整合性違反 {h5-id-consistency-violation}
+##### 2.4.2.1. ID 整合性違反 {#h5-id-consistency-violation}
 
   * **典型的なエラーメッセージ:**
 
@@ -476,7 +476,7 @@ JSON Schema による基本的な構造チェックに加え、カスタム検�
         1.  エラーメッセージで指摘されたドキュメントファイル内の `core_principles` 配列を確認します。
         2.  重複している `principle_id` を特定し、ドキュメント内で一意になるように修正します。
 
-##### 2.4.2.2. スニペット参照整合性違反 {h5-snippet-reference-violation}
+##### 2.4.2.2. スニペット参照整合性違反 {#h5-snippet-reference-violation}
 
   * **典型的なエラーメッセージ:**
 
@@ -514,7 +514,7 @@ JSON Schema による基本的な構造チェックに加え、カスタム検�
           * **重要:** パスは必ず `./` で始まる相対パスである必要があります。拡張子は現時点では `.code.md` に従ってください。
     4.  他の参照フィールド (メディア、ドキュメントID、アンカー等) で同様のエラーが出た場合も、参照先が存在するか、ID やアンカー名が正しいかを確認・修正します。Markdown 本文内のアンカー (`{<level>-<topic-slug>}` または見出しの自動生成アンカー) が正しく設定されているかも確認してください。
 
-##### 2.4.2.3. Core Principle 構造違反 (L3+) {h5-core-principle-structure-violation-l3plus}
+##### 2.4.2.3. Core Principle 構造違反 (L3+) {#h5-core-principle-structure-violation-l3plus}
 
   * **典型的なエラーメッセージ:**
 
@@ -558,7 +558,7 @@ JSON Schema による基本的な構造チェックに加え、カスタム検�
     5.  **L0-L4 ドキュメントで `core_principles` が未定義または空配列の場合:**
           * ドキュメントの内容を表す適切な原則を最低一つ定義します。L2 文書であれば複数の原則を、L3/L4 であれば単一の原則 (`<doc-id>-main` 形式) を定義します。
 
-##### 2.4.2.4. 時間整合性違反 (`last_updated` vs `created_at`) {h5-temporal-consistency-violation-last-updated-vs-created-at}
+##### 2.4.2.4. 時間整合性違反 (`last_updated` vs `created_at`) {#h5-temporal-consistency-violation-last-updated-vs-created-at}
 
   * **典型的なエラーメッセージ:**
 
