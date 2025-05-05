@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { readFile, writeFile } from 'fs/promises';
+import { readFile, writeFile } from 'fs/promises'; // Keep writeFile
 import path from 'path';
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
@@ -14,6 +14,7 @@ import { runCli } from 'repomix';
 import { fileURLToPath } from 'url';
 import yaml from 'js-yaml'; // Import js-yaml
 import { Buffer } from 'buffer'; // Import Buffer for byte operations
+import { readCached } from '../utils/fsCache.js'; // Import readCached
 
 /**
  * エラーメッセージをフォーマットするヘルパー関数
@@ -30,25 +31,7 @@ export function formatError(message, error) {
   return formattedMessage;
 }
 
-/**
- * 指定されたパスのファイルを読み込むヘルパー関数
- */
-export async function readFileContent(filePath, description, optional = false) {
-  const absolutePath = path.resolve(filePath);
-  try {
-    const content = await readFile(absolutePath, 'utf-8');
-    return content;
-  } catch (error) {
-    if (error.code === 'ENOENT') {
-      if (optional) {
-        console.warn(`Optional file not found for ${description}: ${absolutePath}. Skipping.`);
-        return null;
-      }
-      throw new Error(`File not found for ${description}: ${absolutePath}`);
-    }
-    throw new Error(`Failed to read ${description} at ${absolutePath}: ${error.message}`);
-  }
-}
+// readFileContent 関数は削除 (readCached を使用するため)
 
 /**
  * Markdownコンテンツから見出しのリストを抽出する (比較用情報を含む)
@@ -413,40 +396,67 @@ export async function main(argParser = parseArguments) {
   }
 
   try {
-    await runRepomix();
-    const repomixContent = await readFileContent('repomix-output.md', 'Repomix Output', true);
+    await runRepomix(); // repomix はファイル書き込みを伴う可能性があるため、先に実行
+
     const templateFileName = `${argv.promptType}-prompt-template.md`;
     const templateFilePath = path.join('temp-documentation-support', templateFileName);
-    const templateContent = await readFileContent(templateFilePath, 'Prompt Template');
-    const subTaskContent = await readFileContent(path.join('temp-documentation-support', 'sub-task.md'), 'Sub-task Document');
-    const microTaskContent = await readFileContent(path.join('temp-documentation-support', 'micro-task.md'), 'Micro-task Document');
-    const targetDocContent = await readFileContent(argv.targetDoc, 'Target Document');
-
-    // TEMP: Test granularity
+    const subTaskPath = path.join('temp-documentation-support', 'sub-task.md');
+    const microTaskPath = path.join('temp-documentation-support', 'micro-task.md');
     const sectionListYamlPath = path.join('temp-documentation-support', 'section-list.yaml');
-    const sectionListYamlContent = await readFileContent(sectionListYamlPath, 'Section List YAML');
+    const repomixOutputPath = 'repomix-output.md'; // Optional file
+
+    // 条件付きで読み込むファイルのパス
+    const plotPath = argv.promptType === 'plot-reviewer' ? path.join('temp-documentation-support', 'plot.yaml') : null;
+    const draftPath = (argv.promptType === 'draft-reviewer' || argv.promptType === 'rewriter') ? path.join('temp-documentation-support', 'draft.md') : null;
+    const reviewPath = argv.promptType === 'rewriter' ? path.join('temp-documentation-support', 'review.md') : null;
+
+    // ファイル読み込みを並列化
+    const [
+        templateContent,
+        subTaskContent,
+        microTaskContent,
+        targetDocContent,
+        sectionListYamlContent,
+        repomixContent, // Optional
+        plotContent,    // Conditional
+        draftContent,   // Conditional
+        reviewContent   // Conditional
+    ] = await Promise.all([
+        readCached(templateFilePath),
+        readCached(subTaskPath),
+        readCached(microTaskPath),
+        readCached(argv.targetDoc),
+        readCached(sectionListYamlPath),
+        readCached(repomixOutputPath).catch(err => { // Handle optional file error
+            if (err.code === 'ENOENT') {
+                console.warn(`Optional file not found: ${repomixOutputPath}. Skipping.`);
+                return null; // Return null if not found
+            }
+            throw err; // Re-throw other errors
+        }),
+        plotPath ? readCached(plotPath) : Promise.resolve(null), // Read conditionally or resolve null
+        draftPath ? readCached(draftPath) : Promise.resolve(null), // Read conditionally or resolve null
+        reviewPath ? readCached(reviewPath) : Promise.resolve(null)  // Read conditionally or resolve null
+    ]);
+
+    // sectionListYamlContent のパース (エラーハンドリング強化)
     let sectionListYamlData = null;
     if (sectionListYamlContent) {
         try {
             sectionListYamlData = yaml.load(sectionListYamlContent);
-            if (!sectionListYamlData || typeof sectionListYamlData !== 'object') {
-                throw new Error('Invalid YAML structure: Root should be an object.');
+            if (!sectionListYamlData || typeof sectionListYamlData !== 'object' || !Array.isArray(sectionListYamlData.sections)) {
+                // より具体的な構造チェック
+                throw new Error('Invalid YAML structure: Root should be an object with a "sections" array.');
             }
         } catch (e) {
             console.error(formatError(`Failed to parse ${sectionListYamlPath}`, e));
             process.exit(1);
         }
     } else {
+        // sectionListYamlContent が null または空の場合のエラー処理
         console.error(`Error: ${sectionListYamlPath} not found or empty.`);
         process.exit(1);
     }
-
-    let plotContent = null;
-    if (argv.promptType === 'plot-reviewer') plotContent = await readFileContent(path.join('temp-documentation-support', 'plot.yaml'), 'Plot YAML');
-    let draftContent = null;
-    if (argv.promptType === 'draft-reviewer' || argv.promptType === 'rewriter') draftContent = await readFileContent(path.join('temp-documentation-support', 'draft.md'), 'Draft Markdown');
-    let reviewContent = null;
-    if (argv.promptType === 'rewriter') reviewContent = await readFileContent(path.join('temp-documentation-support', 'review.md'), 'Review Markdown');
 
     const { currentScope, sectionStructure, documentStructure, sectionListRaw } = determineNextScope(sectionListYamlData, targetDocContent);
 
@@ -469,6 +479,7 @@ export async function main(argParser = parseArguments) {
     console.log(`✅ Prompt successfully generated and saved to: ${outputFilePath}`);
 
   } catch (error) {
+    // Promise.all やその他の非同期処理からのエラーをキャッチ
     console.error(formatError('Failed to generate prompt', error));
     process.exit(1);
   }
