@@ -250,6 +250,7 @@ export function determineNextScope(sectionListYamlData, targetDocContent) {
                 nextSectionData = section;
                 // 親データの設定はここで確定
                 parentH1Data = section.level === 1 ? section : currentParentH1;
+                // ★★★ 修正: nextSectionData が見つかった時点で正しい親 H2 を確定させる ★★★
                 parentH2Data = section.level === 2 ? section : currentParentH2;
                 logScope('Set parent data: H1=%s, H2=%s', parentH1Data?.title, parentH2Data?.title);
                 return; // 発見したら即座に探索終了
@@ -306,19 +307,33 @@ export function determineNextScope(sectionListYamlData, targetDocContent) {
 
     logScope('Next section determined: %s', nextSectionData.title);
     // --- granularity と currentScope のロジック修正 ---
-    // granularity に基づいて再構築する深さを決定
-    const remainingDepthForScope = (nextSectionData.granularity && nextSectionData.granularity > 0)
-        ? nextSectionData.granularity
-        : 6; // デフォルトの残り深さ
-    logScope('Calculating remaining depth for currentScope: %d', remainingDepthForScope);
+    let remainingDepthForScope = 6; // デフォルトの残り深さ
+    let useSingleBranch = false; // デフォルトは false
+
+    if (nextSectionData.granularity && nextSectionData.granularity > 0) {
+        remainingDepthForScope = nextSectionData.granularity;
+        useSingleBranch = true;
+        logScope('Using granularity from nextSectionData (%s): depth=%d, singleBranch=true', nextSectionData.title, remainingDepthForScope);
+    } else if (parentH2Data && parentH2Data.granularity && parentH2Data.granularity > 0) {
+        // ★★★ 修正: parentH2Data が nextSectionData 自身でないことを確認 (H2 が nextSection の場合) ★★★
+        if (parentH2Data !== nextSectionData) {
+            remainingDepthForScope = parentH2Data.granularity;
+            useSingleBranch = true; // 親の granularity を使う場合も singleBranch にする
+            logScope('Using granularity from parentH2Data (%s): depth=%d, singleBranch=true', parentH2Data.title, remainingDepthForScope);
+        } else {
+             logScope('parentH2Data is the same as nextSectionData, falling back to default depth.');
+        }
+    } else {
+        logScope('Using default depth (6) and singleBranch=false for currentScope.');
+    }
 
     // reconstructMarkdownFromYaml を呼び出し、結果を Markdown 文字列に変換
     const currentScope = reconstructMarkdownFromYaml(
         nextSectionData,
         remainingDepthForScope,
-        /* singleBranch = */ Boolean(nextSectionData.granularity) // granularity があれば true
+        useSingleBranch // 決定した singleBranch フラグを使用
     ).trim();
-    logScope('Reconstructed currentScope (first 100 chars): %s', currentScope.substring(0, 100));
+    logScope('Reconstructed currentScope (depth=%d, singleBranch=%s, first 100 chars): %s', remainingDepthForScope, useSingleBranch, currentScope.substring(0, 100));
 
 
     // sectionStructure: 親(H2)とその子要素全体を再構築。H2親がなければH1親(or自身)を使う
