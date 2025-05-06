@@ -681,3 +681,33 @@ CI はプロジェクト全体の品質を担保する重要なプロセスで�
 [セクション 2.3.2](#h4-recommended-full-validation-script) で解説したカスタム検証スクリプトは、CI で実行される検証と**同等のチェック** (VSCode 拡張機能ではカバーしきれないチェックを含む) をローカルで実行できるように設計されています。ローカル検証を習慣づけることで、CI でのエラーを未然に防ぎ、よりスムーズで快適な開発プロセスを実現できます。**CI でのエラー修正にかかる時間を削減するためにも、ローカルでの事前検証を積極的に活用しましょう。**
 
 -----
+
+## 3. Front Matter フィールド詳細解説 {#h2-front-matter-field-details}
+
+### 3.1. 解説の構造 {#h3-explanation-structure}
+
+本ガイドラインのセクション 3 では、Cairns プロジェクトで使用される各 Front Matter フィールドについて、一貫性のある標準化された構造で解説を進めます。この構造化されたアプローチは、読者が各フィールドの目的、技術的な定義、具体的な使い方、および運用上の注意点などを効率的に理解し、必要な情報へ迅速にアクセスできるように設計されています。セクション [1.2 Front Matter の重要性](#h3-importance-of-front-matter) で述べた Front Matter の重要性（一貫性、自動化、AI 活用、ガバナンス）を、各フィールドレベルで具体的に理解するための一助となります。
+
+各フィールドの解説（セクション 3.2 以降）は、原則として以下の項目から構成されます。
+
+* **目的 (Why):**
+    * そのフィールドが**なぜ**導入されたのか、どのような背景や課題解決のために存在するのかを説明します。フィールドの存在意義や設計意図を理解するための項目です。
+* **意味 (What):**
+    * そのフィールドが具体的に**何**を表しているのか、どのような情報を持つのかを定義します。フィールドの基本的な意味内容を明確にする項目です。
+* **スキーマ定義:**
+    * 関連する JSON Schema ファイル ([`schema/cairns-front-matter.schema.json`](../schema/cairns-front-matter.schema.json) や参照先の `*-defs.schema.json`, [`schema/patterns.schema.json`](../schema/patterns.schema.json)) における、そのフィールドの技術的な定義 **(データ型、必須/任意、パターン、enum 値など)** を示します。スキーマファイル名と参照パス (例: [`metadata-defs.schema.json#metadata-AccessibilityInfo`](../schema/metadata-defs.schema.json) や [`patterns.schema.json#pattern-docId`](../schema/patterns.schema.json)) を正確に明記し、定義の客観的な根拠を提供します。
+* **記述ルール/規約 (How):**
+    * そのフィールドを**どのように**記述すべきか、具体的なルールや従うべき規約 (例: [`naming-conventions.md`](naming-conventions.md), [`document-map.md`](document-map.md) 参照)、条件付き必須要件 (例: 特定の `status` 値の場合に必須となる他のフィールド)、推奨されるフォーマットや記述内容など、実践的な使い方を解説します。
+* **具体例 (Good):**
+    * フィールドの正しい記述方法を示す、シンプルで分かりやすい具体例 (YAML 形式) を1つ以上提示します。読者が具体的なイメージを持てるように支援します。
+* **ベストプラクティス/推奨事項:**
+    * フィールドをより効果的に活用するための推奨事項や、**保守性・可読性を高めるためのヒントを提供します。** これには、AI (RAG) 活用 ([`document-map.md`](document-map.md) の RAG Index 対象フィールド参照) を促進するための記述の工夫（例: `abstract`, `summary`, `keywords` の質を高める方法）などが含まれる場合があります。
+* **アンチパターン (Bad):**
+    * 避けるべき典型的な誤った記述例とその理由を示します。よくある間違いを防ぎ、ドキュメント全体の品質 ([`document-map.md`](document-map.md) の品質維持プロセス参照) を維持するための注意喚起を行います。
+* **CI/ツール連携:**
+    * そのフィールドが CI/CD パイプライン ([セクション 2.5 CI における検証](#h3-validation-in-ci) 参照) における自動検証 (スキーマ検証、カスタムルール検証) や、他の自動処理ツール (RAG Indexer ([`devtools-list.md`](devtools-list.md) B2), 静的サイトジェネレーター (SSG) ([`devtools-list.md`](devtools-list.md) B1), ガバナンス関連チェック ([`devtools-list.md`](devtools-list.md) B3, B4) 等) によってどのように利用されるかを説明します。フィールドの運用上の重要性や、自動化による品質保証・効率化との関連を示す項目です。関連するカスタム検証ルール ([セクション 5 カスタム検証ルールの詳細](#h2-custom-validation-rule-details) で定義される ID や説明など) への参照を含む場合があります。これにより、CI エラー発生時の原因特定やデバッグが容易になることを目指します。
+
+後続のセクション [3.2 フィールド解説](#h3-field-explanations) では、上記で定義した構造に従って、各 Front Matter フィールドをアルファベット順に詳細に解説していきます。
+
+-----
+
