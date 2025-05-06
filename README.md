@@ -43,8 +43,30 @@ Cairnsプロジェクトの詳細については、まず以下のドキュメ�
     * `L5-ops/`: 運用・実行環境。
 * `schema/`: ドキュメントFront Matterの [JSON Schema](schema/ppl-front-matter.schema.json) 定義ファイル。
 * `snippets/`: ドキュメント内で参照されるコードスニペット。
+* `scripts/`: プロンプト生成などの補助スクリプト。
 * `_dev_docs/`: Cairnsプロジェクト自体の開発に関するドキュメント (Document map等)。
 * `.github/`: GitHub Actionsワークフロー、Issue/PRテンプレート等（予定）。
+
+## スクリプト (`scripts/`)
+
+### `generate-prompt.js`
+
+このスクリプトは、指定されたドキュメントとプロンプトタイプに基づいて、AI向けのプロンプトを生成します。
+
+**Debug ログの有効化:**
+
+スクリプトの詳細な動作を確認したい場合、環境変数 `DEBUG` を設定して実行します。
+
+*   **すべての関連ログを表示:**
+    ```bash
+    DEBUG=generate-prompt* node scripts/generate-prompt.js [引数...]
+    ```
+*   **特定のスコープのログのみを表示 (例: スコープ決定ロジック):**
+    ```bash
+    DEBUG=generate-prompt:scope node scripts/generate-prompt.js [引数...]
+    ```
+
+詳細については、[パフォーマンス改善ドキュメント](docs/performance-improvements.md) を参照してください。
 
 ## 貢献方法 (Contributing)
 

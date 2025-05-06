@@ -1,0 +1,31 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`generate-prompt.js Script formatError should match snapshot for various error types: error with stack 1`] = `
+"Error: Error With Stack
+Details: Error with stack
+Stack: Error: Error with stack
+    at func (file.js:1:1)"
+`;
+
+exports[`generate-prompt.js Script formatError should match snapshot for various error types: error with stderr 1`] = `
+"Error: Error With Stderr
+Details: stderr output
+Stack: Error stack"
+`;
+
+exports[`generate-prompt.js Script formatError should match snapshot for various error types: error with stdout 1`] = `
+"Error: Error With Stdout
+Details: stdout output"
+`;
+
+exports[`generate-prompt.js Script formatError should match snapshot for various error types: message only 1`] = `"Error: Message Only"`;
+
+exports[`generate-prompt.js Script formatError should match snapshot for various error types: plain object error 1`] = `
+"Error: Plain Object Error
+Details: [object Object]"
+`;
+
+exports[`generate-prompt.js Script formatError should match snapshot for various error types: simple error 1`] = `
+"Error: Basic Error
+Details: Simple message"
+`;
