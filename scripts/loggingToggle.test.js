@@ -125,7 +125,8 @@ describe('Logging Toggle via DEBUG environment variable', () => {
     });
 
      // stderr に複数のスコープのログが出力されることを確認
-     expect(stderr).toContain('generate-prompt:main Starting main execution...');
+     // ★★★ 修正: ログメッセージの変更を反映 ★★★
+     expect(stderr).toContain('generate-prompt:main Starting main execution with injected dependencies...');
      expect(stderr).toContain('generate-prompt:scope Determining next scope...');
      // repomix は実行されるが、今回は repomix-output.md がないので repomix ログは出ない想定
      // expect(stderr).toContain('generate-prompt:repomix Executing repomix CLI via library...');

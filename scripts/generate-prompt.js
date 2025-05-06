@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { readFile, writeFile } from 'fs/promises'; // Keep writeFile
+import { readFile, writeFile as originalWriteFile } from 'fs/promises'; // Rename writeFile to avoid conflict
 import path from 'path';
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
@@ -10,11 +10,11 @@ import { visit } from 'unist-util-visit';
 import { toString } from 'mdast-util-to-string'; // Keep for potential fallback or other uses
 import { VFile } from 'vfile';
 import grayMatter from 'gray-matter';
-import { runCli } from 'repomix';
+import { runCli as originalRunCli } from 'repomix'; // Rename runCli
 import { fileURLToPath } from 'url';
 import yaml from 'js-yaml'; // Import js-yaml
 import { Buffer } from 'buffer'; // Import Buffer for byte operations
-import { readCached } from '../utils/fsCache.js'; // Import readCached
+import { readCached as originalReadCached } from '../utils/fsCache.js'; // Rename readCached
 import debug from 'debug'; // Import debug
 
 // デバッガーインスタンスを作成
@@ -101,6 +101,11 @@ function reconstructMarkdownFromYaml(section, remainingDepth, singleBranch = fal
     if (!section || remainingDepth <= 0) {
         return '';
     }
+    // level と title が存在するかチェック
+    if (typeof section.level !== 'number' || typeof section.title !== 'string') {
+        logError('Invalid section structure in reconstructMarkdownFromYaml: %o', section);
+        return ''; // 不正な構造の場合は空文字列を返す
+    }
     let markdown = `${'#'.repeat(section.level)} ${section.title}`;
     if (section.id) {
         markdown += ` {#${section.id}}`;
@@ -141,6 +146,11 @@ function reconstructMarkdownFromYaml(section, remainingDepth, singleBranch = fal
 function reconstructYamlStructure(section, remainingDepth, singleBranch = false) {
     if (!section || remainingDepth <= 0) {
         return null;
+    }
+     // level と title が存在するかチェック
+     if (typeof section.level !== 'number' || typeof section.title !== 'string') {
+        logError('Invalid section structure in reconstructYamlStructure: %o', section);
+        return null; // 不正な構造の場合は null を返す
     }
 
     const node = {
@@ -213,6 +223,12 @@ export function determineNextScope(sectionListYamlData, targetDocContent) {
         }
 
         for (const section of sections) {
+            // 不正なセクション構造をチェック
+            if (!section || typeof section.level !== 'number' || typeof section.title !== 'string') {
+                logScope('Skipping invalid section structure: %o', section);
+                continue; // 不正な構造のセクションはスキップ
+            }
+
             logScope('Checking section: level=%d, title="%s"', section.level, section.title);
 
             /* ① YAML ⇔ Target Doc 見出し比較 */
@@ -318,6 +334,11 @@ export function determineNextScope(sectionListYamlData, targetDocContent) {
     function buildDocStructureRecursive(sections) {
         if (!sections) return;
         for (const section of sections) {
+             // 不正なセクション構造をチェック (ここでも)
+            if (!section || typeof section.level !== 'number' || typeof section.title !== 'string') {
+                logScope('Skipping invalid section structure in buildDocStructureRecursive: %o', section);
+                continue;
+            }
             if (section.level <= 3) { // H3まで含める
                 documentStructure += `${'#'.repeat(section.level)} ${section.title}`;
                 if (section.id) documentStructure += ` {#${section.id}}`;
@@ -372,25 +393,6 @@ export function replacePlaceholders(templateContent, data) {
     return result;
 }
 
-/** repomix 実行 */
-async function runRepomix() {
-  // ユーザー向けの情報なので console.log のまま
-  console.log(`🔄 Running repomix via library using root config to update repomix-output.md...`);
-  logRepomix('Executing repomix CLI via library...');
-  try {
-    await runCli(['.'], process.cwd(), { quiet: false }); // quiet: false で repomix 自身のログは表示させる
-    // ユーザー向けの情報なので console.log のまま
-    console.log(`✅ repomix command finished running via library.`);
-    console.log(`   Output should be saved based on root repomix.config.json settings.`);
-    logRepomix('repomix CLI execution successful.');
-  } catch (error) {
-    // ユーザー向けのエラーなので console.error/warn のまま
-    console.error(formatError('Failed to execute repomix via library', error));
-    console.warn('Continuing prompt generation despite repomix execution error.');
-    logError('repomix CLI execution failed: %O', error); // debugログにも詳細を残す
-  }
-}
-
 /**
  * コマンドライン引数を解析する関数
  */
@@ -408,13 +410,25 @@ export async function parseArguments() {
 
 
 /**
- * メイン処理 (引数解析関数を引数として受け取る)
+ * メイン処理 (依存性注入オブジェクトを受け取るように変更)
+ * @param {object} [deps] - 依存性注入オブジェクト
+ * @param {Function} [deps.argParser=parseArguments] - yargs ラッパー
+ * @param {Function} [deps.readCachedFn=originalReadCached] - ファイル読み込みキャッシュ関数
+ * @param {Function} [deps.writeFileFn=originalWriteFile] - ファイル書き込み関数
+ * @param {Function} [deps.determineNextScopeFn=determineNextScope] - 次のスコープ決定関数
+ * @param {Function} [deps.runCliFn=originalRunCli] - repomix CLI 実行関数
  */
-export async function main(argParser = parseArguments) {
-  logMain('Starting main execution...');
+export async function main({
+  argParser = parseArguments,
+  readCachedFn = originalReadCached, // ★★★ DI: readCachedFn
+  writeFileFn = originalWriteFile,   // ★★★ DI: writeFileFn
+  determineNextScopeFn = determineNextScope, // ★★★ DI: determineNextScopeFn
+  runCliFn = originalRunCli,         // ★★★ DI: runCliFn
+} = {}) {
+  logMain('Starting main execution with injected dependencies...');
   let argv;
   try {
-      argv = await argParser();
+      argv = await argParser(); // 注入された argParser を使用
   } catch (error) {
       // ユーザー向けのエラーなので console.error のまま
       console.error(formatError('Argument parsing failed', error));
@@ -423,7 +437,20 @@ export async function main(argParser = parseArguments) {
   }
 
   try {
-    await runRepomix(); // repomix はファイル書き込みを伴う可能性があるため、先に実行
+    // ★★★ DI: runCliFn を直接呼び出し ★★★
+    console.log(`🔄 Running repomix via library using root config to update repomix-output.md...`);
+    logRepomix('Executing repomix CLI via injected runCliFn...');
+    try {
+        await runCliFn(['.'], process.cwd(), { quiet: false }); // 注入された runCliFn を使用
+        console.log(`✅ repomix command finished running via library.`);
+        console.log(`   Output should be saved based on root repomix.config.json settings.`);
+        logRepomix('repomix CLI execution successful.');
+    } catch (error) {
+        console.error(formatError('Failed to execute repomix via library', error));
+        console.warn('Continuing prompt generation despite repomix execution error.');
+        logError('repomix CLI execution failed: %O', error);
+    }
+    // ▲▲▲ DI: runCliFn ▲▲▲
 
     const templateFileName = `${argv.promptType}-prompt-template.md`;
     const templateFilePath = path.join('temp-documentation-support', templateFileName);
@@ -437,71 +464,78 @@ export async function main(argParser = parseArguments) {
     const draftPath = (argv.promptType === 'draft-reviewer' || argv.promptType === 'rewriter') ? path.join('temp-documentation-support', 'draft.md') : null;
     const reviewPath = argv.promptType === 'rewriter' ? path.join('temp-documentation-support', 'review.md') : null;
 
-    logMain('Reading required files in parallel...');
-    // ファイル読み込みを並列化
+    logMain('Reading required files in parallel using injected readCachedFn...');
+    // ★★★ DI: readCachedFn を使用 ★★★
     const [
         templateContent,
         subTaskContent,
         microTaskContent,
         targetDocContent,
-        sectionListYamlContent,
+        sectionListYamlContentResult, // 結果を変数に格納
         repomixContent, // Optional
         plotContent,    // Conditional
         draftContent,   // Conditional
         reviewContent   // Conditional
     ] = await Promise.all([
-        readCached(templateFilePath),
-        readCached(subTaskPath),
-        readCached(microTaskPath),
-        readCached(argv.targetDoc),
-        readCached(sectionListYamlPath),
-        readCached(repomixOutputPath).catch(err => { // Handle optional file error
+        readCachedFn(templateFilePath),
+        readCachedFn(subTaskPath),
+        readCachedFn(microTaskPath),
+        readCachedFn(argv.targetDoc),
+        readCachedFn(sectionListYamlPath).catch(err => { // ★★★ 修正: ENOENT をキャッチして null を返す ★★★
             if (err.code === 'ENOENT') {
-                // ユーザー向けの警告なので console.warn のまま
-                console.warn(`Optional file not found: ${repomixOutputPath}. Skipping.`);
-                logMain('Optional file %s not found, resolving null.', repomixOutputPath); // debugログ
-                return null; // Return null if not found
+                logError('Required file %s not found during Promise.all: %O', sectionListYamlPath, err);
+                return null; // ファイルが見つからない場合は null を返す
             }
-            logError('Error reading optional file %s: %O', repomixOutputPath, err); // debugログ
-            throw err; // Re-throw other errors
+            throw err; // その他のエラーは再スロー
         }),
-        plotPath ? readCached(plotPath) : Promise.resolve(null), // Read conditionally or resolve null
-        draftPath ? readCached(draftPath) : Promise.resolve(null), // Read conditionally or resolve null
-        reviewPath ? readCached(reviewPath) : Promise.resolve(null)  // Read conditionally or resolve null
+        readCachedFn(repomixOutputPath).catch(err => {
+            if (err.code === 'ENOENT') {
+                console.warn(`Optional file not found: ${repomixOutputPath}. Skipping.`);
+                logMain('Optional file %s not found, resolving null.', repomixOutputPath);
+                return null;
+            }
+            logError('Error reading optional file %s: %O', repomixOutputPath, err);
+            throw err;
+        }),
+        plotPath ? readCachedFn(plotPath) : Promise.resolve(null),
+        draftPath ? readCachedFn(draftPath) : Promise.resolve(null),
+        reviewPath ? readCachedFn(reviewPath) : Promise.resolve(null)
     ]);
+    // ▲▲▲ DI: readCachedFn ▲▲▲
     logMain('All required files read.');
+
+    // ★★★ 修正: sectionListYamlContentResult の存在チェック ★★★
+    if (!sectionListYamlContentResult) {
+        console.error(`Error: Required file ${sectionListYamlPath} not found or could not be read.`);
+        logError('Required file %s was not loaded successfully.', sectionListYamlPath);
+        process.exit(1);
+    }
+    // ▲▲▲ 修正 ▲▲▲
 
     // sectionListYamlContent のパース (エラーハンドリング強化)
     let sectionListYamlData = null;
-    if (sectionListYamlContent) {
-        logMain('Parsing section list YAML...');
-        try {
-            sectionListYamlData = yaml.load(sectionListYamlContent);
-            if (!sectionListYamlData || typeof sectionListYamlData !== 'object' || !Array.isArray(sectionListYamlData.sections)) {
-                // より具体的な構造チェック
-                throw new Error('Invalid YAML structure: Root should be an object with a "sections" array.');
-            }
-            logMain('Section list YAML parsed successfully.');
-        } catch (e) {
-            // ユーザー向けのエラーなので console.error のまま
-            console.error(formatError(`Failed to parse ${sectionListYamlPath}`, e));
-            logError('Failed to parse YAML file %s: %O', sectionListYamlPath, e); // debugログ
-            process.exit(1);
+    // if (sectionListYamlContent) { // チェック済みなので不要
+    logMain('Parsing section list YAML...');
+    try {
+        sectionListYamlData = yaml.load(sectionListYamlContentResult); // ★★★ 修正: 結果変数を使用 ★★★
+        if (!sectionListYamlData || typeof sectionListYamlData !== 'object' || !Array.isArray(sectionListYamlData.sections)) {
+            throw new Error('Invalid YAML structure: Root should be an object with a "sections" array.');
         }
-    } else {
-        // sectionListYamlContent が null または空の場合のエラー処理
-        // ユーザー向けのエラーなので console.error のまま
-        console.error(`Error: ${sectionListYamlPath} not found or empty.`);
-        logError('Section list YAML file %s not found or empty.', sectionListYamlPath); // debugログ
+        logMain('Section list YAML parsed successfully.');
+    } catch (e) {
+        console.error(formatError(`Failed to parse ${sectionListYamlPath}`, e));
+        logError('Failed to parse YAML file %s: %O', sectionListYamlPath, e);
         process.exit(1);
     }
+    // } else { ... } // チェック済みなので不要
 
-    const { currentScope, sectionStructure, documentStructure, sectionListRaw } = determineNextScope(sectionListYamlData, targetDocContent);
+    // ★★★ DI: determineNextScopeFn を使用 ★★★
+    const { currentScope, sectionStructure, documentStructure, sectionListRaw } = determineNextScopeFn(sectionListYamlData, targetDocContent);
+    // ▲▲▲ DI: determineNextScopeFn ▲▲▲
 
     if (currentScope === "<!-- No next section identified from YAML -->") {
-        // ユーザー向けの情報なので console.log のまま
         console.log("Skipping prompt generation because no next section was identified from YAML.");
-        logMain('No next section identified, skipping prompt generation.'); // debugログ
+        logMain('No next section identified, skipping prompt generation.');
         return;
     }
 
@@ -517,17 +551,17 @@ export async function main(argParser = parseArguments) {
     logMain('Prompt content generated.');
 
     const outputFilePath = path.resolve(argv.output);
-    logMain('Writing generated prompt to: %s', outputFilePath);
-    await writeFile(outputFilePath, generatedPrompt, 'utf-8');
-    // ユーザー向けの成功メッセージなので console.log のまま
+    logMain('Writing generated prompt to: %s using injected writeFileFn...', outputFilePath);
+    // ★★★ DI: writeFileFn を使用 ★★★
+    await writeFileFn(outputFilePath, generatedPrompt, 'utf-8');
+    // ▲▲▲ DI: writeFileFn ▲▲▲
     console.log(`✅ Prompt successfully generated and saved to: ${outputFilePath}`);
     logMain('Main execution completed successfully.');
 
   } catch (error) {
     // Promise.all やその他の非同期処理からのエラーをキャッチ
-    // ユーザー向けのエラーなので console.error のまま
     console.error(formatError('Failed to generate prompt', error));
-    logError('Unhandled error during main execution: %O', error); // debugログ
+    logError('Unhandled error during main execution: %O', error);
     process.exit(1);
   }
 }
@@ -537,5 +571,5 @@ const isMainScript = process.argv[1] === fileURLToPath(import.meta.url);
 logMain('Is main script? %s', isMainScript);
 
 if (isMainScript) {
-  main();
+  main(); // ★★★ 変更なし: デフォルトの依存関係で実行される ★★★
 }
